@@ -24,5 +24,5 @@ def load_breastmnist_data(datapath: str) -> List[ArrayLike]:
         val_labels = breastmnist_data["val_labels"]
         test_labels = breastmnist_data["test_labels"]
 
-    return [train_data, train_labels, val_data, val_labels, train_data, train_labels]
+    return [train_data, train_labels, val_data, val_labels, test_data, test_labels]
 

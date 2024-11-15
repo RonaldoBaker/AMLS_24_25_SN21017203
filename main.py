@@ -1,2 +1,10 @@
+# Import dependencies
+from A.mainA import taskA
+
 def main():
-    pass
+    taskA()
+
+    # Implement taskB function
+
+if __name__ == "__main__":
+    main()

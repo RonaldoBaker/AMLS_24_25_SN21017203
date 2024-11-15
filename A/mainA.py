@@ -1,5 +1,5 @@
 # Import dependencies
-from acquisitionA import load_breastmnist_data
+from A.acquisitionA import load_breastmnist_data
 
 # Define constant(s)
 DATAPATH = "Datasets/breastmnist.npz"
