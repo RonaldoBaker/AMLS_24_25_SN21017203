@@ -1,20 +1,41 @@
 # Import dependencies
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.metrics import classification_report, accuracy_score, roc_auc_score
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import List
+from typing import List, Optional
 
 class LogisticRegressionModel:
-    def __init__(self, solver: str):
+    def __init__(self, 
+                 solver: str,
+                 with_cv: bool = False,
+                 Cs: Optional[List[float]] = None,
+                 cv: Optional[int] = None,
+                 scoring: Optional[str] = None,
+                 max_iter: Optional[int] = None):
         """
-        Initialises a logistic regression model object
+        Initialises a logistic regression model object.
 
-        Arg:
-        - solver (str): The type of solver to use in the logistic regression model
+        Arg(s):
+        - solver (str): The type of solver to use in the logistic regression model.
+        - with_cv (boolean): If True, creates a logistic regression model with cross-validation. Default is False.
+
+        - Cs (Optional[List[float]]): List of C values (regularisation strengths).
+        - cv (Optional[int]): The number of cross-validation folds.
+        - scoring (Optional[str]): The metric to optimise.
+        - max_iter (Optional[int]): The maximum number of iterations for convergence.
         """
         self.solver = solver
-        self.model = LogisticRegression(solver = solver)
+        self.with_cv = with_cv
+        if self.with_cv:
+            self.model = LogisticRegressionCV(
+                Cs = Cs,
+                cv = cv,
+                scoring = scoring,
+                max_iter = max_iter
+            )
+        else:
+            self.model = LogisticRegression(solver = solver)
 
 
     def preprocess(self, data: List[ArrayLike], labels: List[ArrayLike]) -> tuple[List[ArrayLike], List[ArrayLike]]: 
@@ -63,13 +84,18 @@ class LogisticRegressionModel:
         return y_pred
 
 
-    def evaluate(self, y_test: ArrayLike, y_pred: ArrayLike):
+    def evaluate(self, y_true: ArrayLike, y_pred: ArrayLike):
         """
         Evaluates model accuracy
 
         Arg(s):
-        - y_test (ArrayLike): The test data to be compared
+        - y_true (ArrayLike): The test data to be compared
         - y_pred (ArrayLike): The predicted data to be compared
         """
-        print(f"Accuracy score: {accuracy_score(y_test, y_pred)*100: .2f}%")
-        print(classification_report(y_test, y_pred))
+        print(f"Accuracy score: {accuracy_score(y_true, y_pred): .3f}")
+        print(f"AUC-ROC Score: {roc_auc_score(y_true, y_pred): .3f}")
+        print(classification_report(y_true, y_pred),"\n")   
+
+        if self.with_cv:
+            # Evaluating logistic regression with cv
+            print(f"Best regularisation value (C): {self.model.C_[0]}\n")

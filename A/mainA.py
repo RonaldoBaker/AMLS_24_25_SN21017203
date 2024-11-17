@@ -26,7 +26,7 @@ def taskA():
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
-    # Instantiate model
+    # Instantiate model logistic regression without cross-validation
     logreg = LogisticRegressionModel(solver = SOLVER)
 
     # Preprocess data
@@ -35,15 +35,32 @@ def taskA():
     train_labels, val_labels, test_labels = processed_labels[0], processed_labels[1], processed_labels[2]
 
     # Make prediction with validation data
-    predict_labels_val = logreg.predict(train_data, train_labels, val_data)
+    y_val_pred= logreg.predict(train_data, train_labels, val_data)
 
     # Evaluation prediction
     print("Evaluation on validation set")
-    logreg.evaluate(val_labels, predict_labels_val)
+    logreg.evaluate(val_labels, y_val_pred)
 
     # Make classification prediction on test data
-    predict_labels = logreg.predict(train_data, train_labels, test_data)
+    y_test_pred = logreg.predict(train_data, train_labels, test_data)
 
     # Evaluate prediction
     print("Evaluation on test set")
-    logreg.evaluate(test_labels, predict_labels)
+    logreg.evaluate(test_labels, y_test_pred)
+
+    # ------------------------------------------------------------------- #
+
+    # Instantiate logistic regression model with cross-validation
+    logreg_cv = LogisticRegressionModel(solver = SOLVER,
+                                        with_cv = True,
+                                        Cs = [0.001, 0.01, 0.1, 1, 10, 100],
+                                        cv = 5,
+                                        scoring = "roc_auc",
+                                        max_iter = 1000)
+    
+    y_val_pred_cv = logreg_cv.predict(train_data, train_labels, val_data)
+    
+    # TODO:This value needs to be passed directly to the roc_auc_score function, not the value above
+    y_val_auc_pred = logreg_cv.model.predict_proba(val_data)[:, 1]
+
+    logreg_cv.evaluate(val_labels, y_val_pred_cv)
