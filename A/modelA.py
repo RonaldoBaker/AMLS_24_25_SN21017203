@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 import numpy as np
 from numpy.typing import ArrayLike
+from typing import List
 
 class LogisticRegressionModel:
     def __init__(self, solver: str):
@@ -16,32 +17,29 @@ class LogisticRegressionModel:
         self.model = LogisticRegression(solver = solver)
 
 
-    def preprocess(self, train_data: ArrayLike, train_labels: ArrayLike, test_data: ArrayLike, test_labels: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
+    def preprocess(self, data: List[ArrayLike], labels: List[ArrayLike]) -> tuple[List[ArrayLike], List[ArrayLike]]: 
         """
         Prepares data for logistic regression model 
 
         Arg(s):
-        - train_data (ArrayLike): The training data to be preprocessed
-        - train_labels (ArrayLike): The labels of the training data to be preprocessed
-        - test_data (ArrayLike): The test data to be preprocessed
-        - test_labels (ArrayLike): The labels of the test data to be preprocessed
+        - data (List[ArrayLike]): The data to be preprocessed
+        - labels (List[ArrayLike]): The labels of the data to be preprocessed
 
         Returns:
-        - tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]: The preprocessed train and test data and labels
+        - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
         """
-        # Reshape data from 3D to 2D numpy arrays
-        train_data = train_data.reshape(train_data.shape[0], -1)
-        test_data = test_data.reshape(test_data.shape[0], -1 )
+        for i in range(len(data)):
+            # Reshape data from 3D to 2D numpy arrays
+            data[i] = data[i].reshape(data[i].shape[0], -1)
 
-        # Normalize pixel values to (0, 1)
-        train_data = train_data / 255.0
-        test_data = test_data / 255.0
+            # Normalise pixel values to (0, 1)
+            data[i] = data[i] / 255.0
 
-        # Flatten labels
-        train_labels = np.ravel(train_labels)
-        test_labels = np.ravel(test_labels)
-
-        return train_data, train_labels, test_data, test_labels
+        for i in range(len(labels)):
+            # Flatten labels
+            labels[i] = np.ravel(labels[i])
+            
+        return data, labels
     
 
     def predict(self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike) -> ArrayLike:
@@ -73,5 +71,5 @@ class LogisticRegressionModel:
         - y_test (ArrayLike): The test data to be compared
         - y_pred (ArrayLike): The predicted data to be compared
         """
-        print(f"Accuracy on test set: {accuracy_score(y_test, y_pred)}")
+        print(f"Accuracy score: {accuracy_score(y_test, y_pred)*100: .2f}%")
         print(classification_report(y_test, y_pred))
