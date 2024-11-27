@@ -1,6 +1,6 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, analyse
-from A.modelA import LogisticRegressionModel, KNNModel
+from A.task_A_models import LogisticRegressionModel, KNNModel
 import numpy as np
 import matplotlib.pyplot as plt
 
