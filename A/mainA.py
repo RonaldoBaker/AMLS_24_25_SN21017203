@@ -1,7 +1,8 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, analyse
-from A.modelA import LogisticRegressionModel
+from A.modelA import LogisticRegressionModel, KNNModel
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def taskA():
@@ -64,3 +65,24 @@ def taskA():
     y_val_auc_pred = logreg_cv.model.predict_proba(val_data)[:, 1]
 
     logreg_cv.evaluate(val_labels, y_val_pred_cv)
+
+    # ------------------------------------------------------------------- #
+
+    # KNN model - Finding the optimum value of K (the number of nearest neighbours)
+    accuracies = []
+
+
+    NEIGHBOURS = 30
+    for k in range(1, NEIGHBOURS+1):
+        knn_model = KNNModel(neighbours=k)
+        y_pred = knn_model.predict(train_data, train_labels, test_data)
+        accuracies.append(knn_model.evaluate(test_labels, y_pred))
+
+    # Plot number of nearest neighbours vs AUC-ROC accuracy
+    plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o')
+    plt.grid()
+    plt.title("Accuracy vs K Value")
+    plt.xlabel("No. of nearest neighbours")
+    plt.ylabel("AUC-ROC Accuracy Score")
+    plt.show()
+ 
