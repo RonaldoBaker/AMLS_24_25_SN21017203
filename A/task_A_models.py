@@ -1,10 +1,17 @@
 # Import dependencies
+import torch
+import torch.nn as nn
+import torchvision
+import torch.nn.functional as F
+
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, accuracy_score, roc_auc_score
+
 import numpy as np
 from numpy.typing import ArrayLike
 from typing import List, Optional
+
 
 class LogisticRegressionModel:
     def __init__(self, 
@@ -160,3 +167,35 @@ class KNNModel:
         - y_pred (ArrayLike): The predicted data to be compared
         """
         return roc_auc_score(y_true, y_pred)
+
+
+class CNNModel(nn.Module):
+    def __init__(self):
+        """
+        Defines the CNN model architecture
+        """
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2) # First Conv layer
+        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2) # Second Conv layer
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
+        self.relu = nn.ReLU() # Activation function
+        self.fc1 = nn.Linear(16 * 1 * 1, 8) # Fully connected layer
+        self.fc2 = nn.Linear(8, 1) # Single output for binary classification
+        self.sigmoid = nn.Sigmoid() # Activation function
+
+    def forward(self, x: ArrayLike) -> ArrayLike:
+        """
+        Defines how the input goes through the forward pass
+
+        Arg:
+        - x (ArrayLike): The data to pass through the neural network
+
+        Returns:
+        ArrayLike: The output of the CNN model
+        """
+        x = self.pool(self.relu(self.conv1(x)))
+        x = self.pool(self.relu(self.conv2(x)))
+        x = x.view(x.shape[0], -1) # Flatten for the fully connected layer
+        x = self.relu(self.fc1(x))
+        x = self.sigmoid(self.fc2(x)) # Apply sigmoid function for binary classification
+        return x
