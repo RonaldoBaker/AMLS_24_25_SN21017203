@@ -31,6 +31,7 @@ def taskA():
     val_labels = data["val_labels"]
 
     # Instantiate model logistic regression without cross-validation
+    print("LOGISTIC REGRESSION\n")
     logreg = LogisticRegressionModel(solver = SOLVER)
 
     # Preprocess data
@@ -51,10 +52,13 @@ def taskA():
     # Evaluate prediction
     print("Evaluation on test set")
     logreg.evaluate(processed_test_labels, y_test_pred)
+    print("Classification Report (Logistic Regression)")
+    logreg.report(processed_test_labels, y_test_pred)
 
     # ------------------------------------------------------------------- #
 
     # Instantiate logistic regression model with cross-validation
+    print("LOGISTIC REGRESSION WITH CROSS-VALIDATION\n")
     logreg_cv = LogisticRegressionModel(solver = SOLVER,
                                         with_cv = True,
                                         Cs = [0.001, 0.01, 0.1, 1, 10, 100],
@@ -65,9 +69,13 @@ def taskA():
     y_val_pred_cv = logreg_cv.predict(processed_train_data, processed_train_labels, processed_val_data)
     
     # TODO:This value needs to be passed directly to the roc_auc_score function, not the value above
-    y_val_auc_pred = logreg_cv.model.predict_proba(processed_val_data)[:, 1]
+    # y_val_auc_pred = logreg_cv.model.predict_proba(processed_val_data)[:, 1]
 
+    print("Evaluation on validation set")
     logreg_cv.evaluate(processed_val_labels, y_val_pred_cv)
+
+    print("Classification Report (Logistic Regression with Cross-Validation)")
+    logreg_cv.report(processed_val_labels, y_val_pred_cv)
 
     # ------------------------------------------------------------------- #
 
@@ -121,6 +129,7 @@ def taskA():
     val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
 
     # Instantiate CNN model and move to device being used
+    print("CNN\n")
     cnn = CNNModel()
     cnn.to(DEVICE) 
 

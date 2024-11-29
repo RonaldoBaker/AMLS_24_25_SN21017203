@@ -98,13 +98,13 @@ class LogisticRegressionModel:
         - y_true (ArrayLike): The test data to be compared
         - y_pred (ArrayLike): The predicted data to be compared
         """
-        print(f"Accuracy score: {accuracy_score(y_true, y_pred): .3f}")
-        print(f"AUC-ROC Score: {roc_auc_score(y_true, y_pred): .3f}")
-        print(classification_report(y_true, y_pred), "\n")
-
+        print(f"AUC-ROC Score: {roc_auc_score(y_true, y_pred): .3f}\n")
         if self.with_cv:
             # Evaluating logistic regression with cv
             print(f"Best regularisation value (C): {self.model.C_[0]}\n")
+
+    def report(self, y_true: ArrayLike, y_pred: ArrayLike):
+        print(classification_report(y_true, y_pred))
 
 
 class KNNModel:
@@ -274,6 +274,7 @@ class CNNModelTrainer:
                 val_batch_count = 0
 
                 print(f"Epoch: {epoch} | Train Loss: {avg_train_loss: .3f} | Val Loss: {avg_val_loss: .3f} | Val Accuracy: {avg_val_accuracy: .3f}")
+        print("\n")
 
     def evaluate(self):
         # TODO: Comment and add docstring
@@ -293,6 +294,6 @@ class CNNModelTrainer:
                 batch_count += 1
 
         avg_accuracy = running_accuracy / batch_count
-        print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%")
+        print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
         print(classification_report(all_labels, all_predictions))
