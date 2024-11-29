@@ -1,8 +1,6 @@
 # Import dependencies
 import torch
 import torch.nn as nn
-import torchvision
-import torch.nn.functional as F
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
@@ -199,3 +197,89 @@ class CNNModel(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.sigmoid(self.fc2(x)) # Apply sigmoid function for binary classification
         return x
+
+
+class CNNModelTrainer():
+    def __init__(self, train_data: ArrayLike, test_data: ArrayLike, val_data: ArrayLike, cnn_model: CNNModel, epochs: int, loss_func: torch.nn, optimiser: torch.optim):
+        self.train_data = train_data
+        self.test_data = test_data
+        self.val_data = val_data
+        self.cnn = cnn_model
+        self.epochs = epochs
+        self.loss_func = loss_func
+        self.optimiser = optimiser
+        # Empty lists to track loss and accuracy
+        self.train_losses = []
+        self.val_losses = []
+        self.val_accuracies = []
+
+    def train(self):
+
+        running_train_loss = 0.0
+        train_batch_count = 0
+
+        running_val_loss = 0.0
+        running_val_accuracy = 0.0
+        val_batch_count = 0
+
+        for epoch in range(self.epochs):
+            # Train in batches
+            for batch_index, (images, labels) in enumerate(self.train_data):
+                self.cnn.train()
+                self.optimiser.zero_grad()
+                outputs = self.cnn(images)
+                loss = self.loss_func(outputs, labels)
+                loss.backward()
+                self.optimiser.step()
+                running_train_loss += loss.item()
+                train_batch_count += 1
+
+            # Evaluation
+            with torch.no_grad():
+                self.cnn.eval()
+                for images, labels in self.val_data:
+                    self.optimiser.zero_grad()
+                    outputs = self.cnn(images)
+                    predicted = (outputs > 0.5).float()
+                    accuracy = roc_auc_score(labels, predicted)
+                    loss = self.loss_func(outputs, labels)
+                    running_val_accuracy += accuracy
+                    running_val_loss += loss.item()
+                    val_batch_count += 1
+            
+            if epoch % 100 == 0:
+                avg_train_loss = running_train_loss / train_batch_count
+                avg_val_loss = running_val_loss / val_batch_count
+                avg_val_accuracy = running_val_accuracy / val_batch_count
+                self.train_losses.append(avg_train_loss)
+                self.val_losses.append(avg_val_loss)
+                self.val_accuracies.append(avg_val_accuracy)
+                
+                running_train_loss = 0.0
+                train_batch_count = 0
+                running_val_loss = 0.0
+                running_val_accuracy = 0.0
+                val_batch_count = 0
+
+                print(f"Epoch: {epoch} | Train Loss: {avg_train_loss: .3f} | Val Loss: {avg_val_loss: .3f} | Val Accuracy: {avg_val_accuracy: .3f}")
+    
+    def evaluate(self):
+        all_predictions = []
+        all_labels = []
+
+        running_accuracy = 0.0
+        batch_count = 0
+        with torch.no_grad():
+            for image, labels in self.test_data:
+                outputs = self.cnn(image)
+                predicted_labels = (outputs > 0.5).int()
+                accuracy = roc_auc_score(labels, predicted_labels)
+                all_predictions.extend(predicted_labels)
+                all_labels.extend(labels)
+                running_accuracy += accuracy
+                batch_count += 1
+
+        avg_accuracy = running_accuracy / batch_count
+        print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%")
+        print("Classification Report (CNN)")
+        print(classification_report(all_labels, all_predictions))

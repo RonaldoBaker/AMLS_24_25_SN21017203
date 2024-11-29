@@ -1,13 +1,11 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, analyse
-from A.task_A_models import LogisticRegressionModel, KNNModel, CNNModel
-import numpy as np
+from A.task_A_models import LogisticRegressionModel, KNNModel, CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
-import torchvision.models as models
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from sklearn.metrics import roc_auc_score, accuracy_score
 
 
 def taskA():
@@ -92,20 +90,15 @@ def taskA():
  
     # ------------------------------------------------------------------- #
 
-    # Neural networks for binary classification
-
-    # Pre-trained model - ResNet
-    # resnet18 = models.resnet18(pretrained=True)
-    # TODO: finish
-
     # CNN from scratch
+
     # Define hyperparameters
-    BATCH_SIZE = 16
+    BATCH_SIZE = 64
     EPOCHS = 1000
     LEARNING_RATE = 0.001
 
+    # Define device if dedicated GPU is available
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
     # Create tensors and add dimension for greyscale image data, and make labels 2D
     train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
@@ -135,54 +128,7 @@ def taskA():
     loss_func = nn.BCELoss()
     optimiser = optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
 
-    # Empty list to track loss and accuracy
-    train_losses = []
-    batch_metrics = []
-    validation_accuracies = []
-
-    for epoch in range(EPOCHS):
-        # Train in batches
-        for images, labels in train_loader:
-            cnn.train()
-            optimiser.zero_grad()
-            outputs = cnn(images)
-            loss = loss_func(outputs, labels)
-            batch_metrics.append(loss.item())
-            loss.backward()
-            optimiser.step()
-        
-        # Take average loss after training all the batches
-        if epoch % 100 == 0:
-            avg_loss = np.mean(np.array(batch_metrics))
-            train_losses.append(avg_loss)
-            batch_metrics.clear()
-
-        # Evaluation
-        with torch.no_grad():
-            cnn.eval()
-            for images, labels in val_loader:
-                optimiser.zero_grad()
-                outputs = cnn(images)
-                predicted = (outputs > 0.5).int()
-                accuracy = accuracy_score(labels, predicted)
-                batch_metrics.append(accuracy)
-            
-            # Take average accuracy after evaluation all batches
-            if epoch % 100 == 0:
-                avg_accuracy = np.mean(np.array(batch_metrics))
-                validation_accuracies.append(avg_accuracy)
-                batch_metrics.clear()
-        
-        if epoch % 100 == 0:
-            print(f"Epoch: {epoch} | Loss: {avg_loss: .3f} | Accuracy: {avg_accuracy: .3f}")
-
-    # Test
-    with torch.no_grad():
-        for image, labels in test_loader:
-            outputs = cnn(image)
-            predicted_labels = (outputs > 0.5).int()
-            accuracy = accuracy_score(labels, predicted_labels)
-            batch_metrics.append(accuracy)
-
-        avg_accuracy = np.mean(np.array(batch_metrics))
-        print(f"Accuracy on test data: {avg_accuracy* 100: .2f}%")
+    # Train model
+    cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
+    cnn_trainer.train()
+    cnn_trainer.evaluate()
