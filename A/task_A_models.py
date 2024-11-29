@@ -253,7 +253,7 @@ class CNNModelTrainer:
                     self.optimiser.zero_grad()
                     outputs = self.cnn(images)
                     predicted = (outputs > 0.5).float()
-                    accuracy = roc_auc_score(labels, predicted)
+                    accuracy = roc_auc_score(labels.cpu(), predicted.cpu())
                     loss = self.loss_func(outputs, labels)
                     running_val_accuracy += accuracy
                     running_val_loss += loss.item()
@@ -287,9 +287,9 @@ class CNNModelTrainer:
             for image, labels in self.test_data:
                 outputs = self.cnn(image)
                 predicted_labels = (outputs > 0.5).int()
-                accuracy = roc_auc_score(labels, predicted_labels)
-                all_predictions.extend(predicted_labels)
-                all_labels.extend(labels)
+                accuracy = roc_auc_score(labels.cpu(), predicted_labels.cpu())
+                all_predictions.extend(predicted_labels.cpu())
+                all_labels.extend(labels.cpu())
                 running_accuracy += accuracy
                 batch_count += 1
 

@@ -39,9 +39,9 @@ def analyse(data: ArrayLike):
     print(dataset.info, "\n")
 
     # Find shape of arrays
-    print(f"The shape of the training data is {data["train_data"].shape}")
-    print(f"The shape of the validation data is {data["val_data"].shape}")
-    print(f"The shape of the testing data is {data["test_data"].shape}\n")
+    print(f"The shape of the training data is {data['train_data'].shape}")
+    print(f"The shape of the validation data is {data['val_data'].shape}")
+    print(f"The shape of the testing data is {data['test_data'].shape}\n")
 
     # Find how many malignant and normal/benign samples exist
     data_labels = np.concatenate((data["train_labels"], data["test_labels"], data["val_labels"]), axis = 0)

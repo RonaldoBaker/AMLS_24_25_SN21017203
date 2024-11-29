@@ -105,6 +105,8 @@ def taskA():
     EPOCHS = 1000
     LEARNING_RATE = 0.001
 
+    DEVICE_NUM = 1 
+    torch.cuda.set_device(DEVICE_NUM)
     # Define device if dedicated GPU is available
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
