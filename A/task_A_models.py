@@ -12,13 +12,15 @@ from typing import List, Optional
 
 
 class LogisticRegressionModel:
-    def __init__(self, 
-                 solver: str,
-                 with_cv: bool = False,
-                 Cs: Optional[List[float]] = None,
-                 cv: Optional[int] = None,
-                 scoring: Optional[str] = None,
-                 max_iter: Optional[int] = None):
+    def __init__(
+        self,
+        solver: str,
+        with_cv: bool = False,
+        Cs: Optional[List[float]] = None,
+        cv: Optional[int] = None,
+        scoring: Optional[str] = None,
+        max_iter: Optional[int] = None,
+    ):
         """
         Initialises a logistic regression model object.
 
@@ -35,18 +37,16 @@ class LogisticRegressionModel:
         self.with_cv = with_cv
         if self.with_cv:
             self.model = LogisticRegressionCV(
-                Cs = Cs,
-                cv = cv,
-                scoring = scoring,
-                max_iter = max_iter
+                Cs=Cs, cv=cv, scoring=scoring, max_iter=max_iter
             )
         else:
-            self.model = LogisticRegression(solver = solver)
+            self.model = LogisticRegression(solver=solver)
 
-
-    def preprocess(self, data: List[ArrayLike], labels: List[ArrayLike]) -> tuple[List[ArrayLike], List[ArrayLike]]: 
+    def preprocess(
+        self, data: List[ArrayLike], labels: List[ArrayLike]
+    ) -> tuple[List[ArrayLike], List[ArrayLike]]:
         """
-        Prepares data for logistic regression model 
+        Prepares data for logistic regression model
 
         Arg(s):
         - data (List[ArrayLike]): The data to be preprocessed
@@ -65,11 +65,12 @@ class LogisticRegressionModel:
         for i in range(len(labels)):
             # Flatten labels
             labels[i] = np.ravel(labels[i])
-            
-        return data, labels
-    
 
-    def predict(self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike) -> ArrayLike:
+        return data, labels
+
+    def predict(
+        self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
+    ) -> ArrayLike:
         """
         Trains the logistic model and makes classification predictions from the test data
 
@@ -86,9 +87,8 @@ class LogisticRegressionModel:
 
         # Predict new values
         y_pred = self.model.predict(x_test)
-        
-        return y_pred
 
+        return y_pred
 
     def evaluate(self, y_true: ArrayLike, y_pred: ArrayLike):
         """
@@ -100,7 +100,7 @@ class LogisticRegressionModel:
         """
         print(f"Accuracy score: {accuracy_score(y_true, y_pred): .3f}")
         print(f"AUC-ROC Score: {roc_auc_score(y_true, y_pred): .3f}")
-        print(classification_report(y_true, y_pred),"\n")   
+        print(classification_report(y_true, y_pred), "\n")
 
         if self.with_cv:
             # Evaluating logistic regression with cv
@@ -110,10 +110,12 @@ class LogisticRegressionModel:
 class KNNModel:
     def __init__(self, neighbours: int):
         self.model = KNeighborsClassifier(n_neighbors=neighbours)
-    
-    def preprocess(self, data: List[ArrayLike], labels: List[ArrayLike]) -> tuple[List[ArrayLike], List[ArrayLike]]: 
+
+    def preprocess(
+        self, data: List[ArrayLike], labels: List[ArrayLike]
+    ) -> tuple[List[ArrayLike], List[ArrayLike]]:
         """
-        Prepares data for logistic regression model 
+        Prepares data for logistic regression model
 
         Arg(s):
         - data (List[ArrayLike]): The data to be preprocessed
@@ -132,11 +134,12 @@ class KNNModel:
         for i in range(len(labels)):
             # Flatten labels
             labels[i] = np.ravel(labels[i])
-            
-        return data, labels
-    
 
-    def predict(self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike) -> ArrayLike:
+        return data, labels
+
+    def predict(
+        self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
+    ) -> ArrayLike:
         """
         Trains the logistic model and makes classification predictions from the test data
 
@@ -153,9 +156,9 @@ class KNNModel:
 
         # Predict new values
         y_pred = self.model.predict(x_test)
-        
+
         return y_pred
-    
+
     def evaluate(self, y_true: ArrayLike, y_pred: ArrayLike):
         """
         Evaluates model accuracy
@@ -173,13 +176,13 @@ class CNNModel(nn.Module):
         Defines the CNN model architecture
         """
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2) # First Conv layer
-        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2) # Second Conv layer
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
-        self.relu = nn.ReLU() # Activation function
-        self.fc1 = nn.Linear(16 * 1 * 1, 8) # Fully connected layer
-        self.fc2 = nn.Linear(8, 1) # Single output for binary classification
-        self.sigmoid = nn.Sigmoid() # Activation function
+        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2)  # First Conv layer
+        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2)  # Second Conv layer
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
+        self.relu = nn.ReLU()  # Activation function
+        self.fc1 = nn.Linear(16 * 1 * 1, 8)  # Fully connected layer
+        self.fc2 = nn.Linear(8, 1)  # Single output for binary classification
+        self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x: ArrayLike) -> ArrayLike:
         """
@@ -193,14 +196,23 @@ class CNNModel(nn.Module):
         """
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
-        x = x.view(x.shape[0], -1) # Flatten for the fully connected layer
+        x = x.view(x.shape[0], -1)  # Flatten for the fully connected layer
         x = self.relu(self.fc1(x))
-        x = self.sigmoid(self.fc2(x)) # Apply sigmoid function for binary classification
+        x = self.sigmoid(self.fc2(x))  # Apply sigmoid function for binary classification
         return x
 
 
-class CNNModelTrainer():
-    def __init__(self, train_data: ArrayLike, test_data: ArrayLike, val_data: ArrayLike, cnn_model: CNNModel, epochs: int, loss_func: torch.nn, optimiser: torch.optim):
+class CNNModelTrainer:
+    def __init__(
+        self,
+        train_data: ArrayLike,
+        test_data: ArrayLike,
+        val_data: ArrayLike,
+        cnn_model: CNNModel,
+        epochs: int,
+        loss_func: torch.nn,
+        optimiser: torch.optim,
+    ):
         self.train_data = train_data
         self.test_data = test_data
         self.val_data = val_data
@@ -214,7 +226,7 @@ class CNNModelTrainer():
         self.val_accuracies = []
 
     def train(self):
-
+        # TODO: Comment and add docstring
         running_train_loss = 0.0
         train_batch_count = 0
 
@@ -246,7 +258,7 @@ class CNNModelTrainer():
                     running_val_accuracy += accuracy
                     running_val_loss += loss.item()
                     val_batch_count += 1
-            
+
             if epoch % 100 == 0:
                 avg_train_loss = running_train_loss / train_batch_count
                 avg_val_loss = running_val_loss / val_batch_count
@@ -254,7 +266,7 @@ class CNNModelTrainer():
                 self.train_losses.append(avg_train_loss)
                 self.val_losses.append(avg_val_loss)
                 self.val_accuracies.append(avg_val_accuracy)
-                
+
                 running_train_loss = 0.0
                 train_batch_count = 0
                 running_val_loss = 0.0
@@ -262,8 +274,9 @@ class CNNModelTrainer():
                 val_batch_count = 0
 
                 print(f"Epoch: {epoch} | Train Loss: {avg_train_loss: .3f} | Val Loss: {avg_val_loss: .3f} | Val Accuracy: {avg_val_accuracy: .3f}")
-    
+
     def evaluate(self):
+        # TODO: Comment and add docstring
         all_predictions = []
         all_labels = []
 
