@@ -154,3 +154,7 @@ cython_debug/
 
 # Ignore .DS_Store files created by macOS Finder
 .DS_Store
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
