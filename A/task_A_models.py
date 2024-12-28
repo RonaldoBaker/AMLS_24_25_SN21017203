@@ -9,6 +9,7 @@ from sklearn.metrics import classification_report, roc_auc_score
 import numpy as np
 from numpy.typing import ArrayLike
 from typing import List, Optional
+import matplotlib.pyplot as plt
 
 
 class LogisticRegressionModel:
@@ -297,3 +298,16 @@ class CNNModelTrainer:
         print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
         print(classification_report(all_labels, all_predictions))
+
+
+    def plot_training_curve(self):
+        epochs = range(0, self.epochs, 100)
+        # Plot the training curve
+        plt.plot(epochs, self.train_losses, label="Training Loss")
+        plt.plot(epochs, self.val_losses, label="Validation Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend()
+        plt.grid()
+        plt.title("CNN Training Curve")
+        plt.savefig("figures/CNN_Training_Curve.png")

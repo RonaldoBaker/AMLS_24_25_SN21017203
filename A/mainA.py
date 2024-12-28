@@ -100,7 +100,7 @@ def taskA():
         plt.title("Accuracy vs K Value")
         plt.xlabel("No. of nearest neighbours")
         plt.ylabel("AUC-ROC Score")
-        plt.savefig("KNN_Accuracy_vs_K.png")
+        plt.savefig("figures/KNN_Accuracy_vs_K.png")
  
     # ------------------------------------------------------------------- #
 
@@ -152,3 +152,4 @@ def taskA():
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
         cnn_trainer.train()
         cnn_trainer.evaluate()
+        cnn_trainer.plot_training_curve()
