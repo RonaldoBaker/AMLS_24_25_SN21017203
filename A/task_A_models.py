@@ -171,6 +171,25 @@ class KNNModel:
         return roc_auc_score(y_true, y_pred)
 
 
+class EarlyStopping:
+    def __init__(self, patience: int = 5, delta: int = 0):
+        self.patience = patience # How many epochs to wait for improvement
+        self.delta = delta # Minimum change in monitored quantity to qualify as improvement
+        self.counter = 0 # Counter for patience
+        self.best_loss= None # Best score so far
+        self.early_stop = False # Whether to stop training
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss # Set best less to the first loss
+        elif val_loss < self.best_loss - self.delta:
+            self.best_loss = val_loss
+            self.counter = 0
+        else:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True  # Stop training
+
 class CNNModel(nn.Module):
     def __init__(self):
         """
@@ -228,17 +247,20 @@ class CNNModelTrainer:
 
     def train(self):
         # TODO: Comment and add docstring
-        running_train_loss = 0.0
-        train_batch_count = 0
 
-        running_val_loss = 0.0
-        running_val_accuracy = 0.0
-        val_batch_count = 0
+        # Create instance of EarlyStopping class
+        early_stopping = EarlyStopping(patience=30)
 
         for epoch in range(self.epochs):
+            running_train_loss = 0.0
+            train_batch_count = 0
+            running_val_loss = 0.0
+            running_val_accuracy = 0.0
+            val_batch_count = 0
+
             # Train in batches
-            for batch_index, (images, labels) in enumerate(self.train_data):
-                self.cnn.train()
+            self.cnn.train()
+            for _, (images, labels) in enumerate(self.train_data):
                 self.optimiser.zero_grad()
                 outputs = self.cnn(images)
                 loss = self.loss_func(outputs, labels)
@@ -260,22 +282,23 @@ class CNNModelTrainer:
                     running_val_loss += loss.item()
                     val_batch_count += 1
 
+                    # Early stopping
+                    early_stopping(loss)
+                    if early_stopping.early_stop:
+                        break
+
+            if early_stopping.early_stop:
+                print("Early stopping")
+                break
+
+            self.train_losses.append(running_train_loss / train_batch_count)
+            self.val_losses.append(running_val_loss / val_batch_count)
+            self.val_accuracies.append(running_val_accuracy / val_batch_count)
+
             if epoch % 100 == 0:
-                avg_train_loss = running_train_loss / train_batch_count
-                avg_val_loss = running_val_loss / val_batch_count
-                avg_val_accuracy = running_val_accuracy / val_batch_count
-                self.train_losses.append(avg_train_loss)
-                self.val_losses.append(avg_val_loss)
-                self.val_accuracies.append(avg_val_accuracy)
-
-                running_train_loss = 0.0
-                train_batch_count = 0
-                running_val_loss = 0.0
-                running_val_accuracy = 0.0
-                val_batch_count = 0
-
-                print(f"Epoch: {epoch} | Train Loss: {avg_train_loss: .3f} | Val Loss: {avg_val_loss: .3f} | Val Accuracy: {avg_val_accuracy: .3f}")
+                print(f"Epoch: {epoch} | Train Loss: {self.train_losses[-1]: .3f} | Val Loss: {self.val_losses[-1]: .3f} | Val Accuracy: {self.val_accuracies[-1]: .3f}")
         print("\n")
+
 
     def evaluate(self):
         # TODO: Comment and add docstring
@@ -301,12 +324,11 @@ class CNNModelTrainer:
 
 
     def plot_training_curve(self):
-        epochs = range(0, self.epochs, 100)
         # Plot the training curve
-        plt.plot(epochs, self.train_losses, label="Training Loss")
-        plt.plot(epochs, self.val_losses, label="Validation Loss")
+        plt.plot(self.train_losses, label="Training Loss")
+        plt.plot(self.val_losses, label="Validation Loss")
         plt.xlabel("Epoch")
-        plt.ylabel("Loss/Accuracy")
+        plt.ylabel("Loss")
         plt.legend()
         plt.grid()
         plt.title("CNN Training Curve")
