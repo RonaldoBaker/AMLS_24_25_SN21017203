@@ -105,10 +105,14 @@ def taskA():
     EPOCHS = 1000
     LEARNING_RATE = 0.001
 
-    DEVICE_NUM = 1 
-    torch.cuda.set_device(DEVICE_NUM)
-    # Define device if dedicated GPU is available
-    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    DEVICE_NUM = 1
+    if torch.cuda.is_available():
+        # Define device if dedicated GPU is available
+        DEVICE_NUM = 0
+        torch.cuda.set_device(DEVICE_NUM)
+        DEVICE = torch.device(f"cuda:{DEVICE_NUM}")
+    else:
+        DEVICE = torch.device("cpu")
 
     # Create tensors and add dimension for greyscale image data, and make labels 2D
     train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
