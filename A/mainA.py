@@ -131,13 +131,13 @@ def taskA():
 
         # Create DataLoaders 
         train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
-        train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+        train_loader = DataLoader(train_set, batch_size=len(train_data_tensor), shuffle=True, drop_last=True)
 
         test_set = [(test_data_tensor[i], test_labels_tensor[i]) for i in range(len(test_data_tensor))]
-        test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+        test_loader = DataLoader(test_set, batch_size=len(test_data_tensor), shuffle=True, drop_last=True)
 
         val_set = [(val_data_tensor[i], val_labels_tensor[i]) for i in range(len(val_data_tensor))]
-        val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+        val_loader = DataLoader(val_set, batch_size=len(val_data_tensor), shuffle=True, drop_last=True)
 
         # Instantiate CNN model and move to device being used
         print("CNN\n")
