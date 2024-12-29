@@ -7,6 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.svm import SVC
 
+
 from numpy.typing import ArrayLike
 from typing import List, Optional
 import matplotlib.pyplot as plt
@@ -73,7 +74,7 @@ class LogisticRegressionModel:
         - y_true (ArrayLike): The test data to be compared
         - y_pred (ArrayLike): The predicted data to be compared
         """
-        print(f"AUC-ROC Score: {roc_auc_score(y_true, y_pred): .3f}\n")
+        print(f"ROC-AUC Score: {roc_auc_score(y_true, y_pred) * 100: .2f}%\n")
         if self.with_cv:
             # Evaluating logistic regression with cv
             print(f"Best regularisation value (C): {self.model.C_[0]}\n")
@@ -288,8 +289,3 @@ class CNNModelTrainer:
         plt.grid()
         plt.title("CNN Training Curve")
         plt.savefig("figures/CNN_Training_Curve.png")
-
-
-class SVMModel:
-    def __init__(self):
-        self.model = SVC()

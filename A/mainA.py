@@ -10,6 +10,7 @@ import torch.optim as optim
 
 from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.svm import SVC
+from imblearn.over_sampling import SMOTE
 
 
 def taskA():
@@ -19,10 +20,10 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
+    RUN_LOGREG = True
     RUN_KNN = True
-    RUN_LOGREG = False
-    RUN_CNN = False
     RUN_SVM = True
+    RUN_CNN = False
 
     # Load BreastMNIST data
     data = load_breastmnist_data(datapath=DATAPATH)
@@ -38,10 +39,14 @@ def taskA():
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
-    # Preprocess data
-    data, labels = preprocess(data = [train_data, val_data, test_data], labels = [train_labels, val_labels, test_labels])
-    X_train, X_val, X_test = data[0], data[1], data[2]
-    y_train, y_val, y_test = labels[0], labels[1], labels[2]
+    # Preprocess train and test data for traditional machine learning models
+    data, labels = preprocess(data = [train_data, test_data], labels = [train_labels, test_labels])
+    X_train, X_test = data[0], data[1]
+    y_train, y_test = labels[0], labels[1]
+
+    # Apply SMOTE to balance the dataset
+    smote = SMOTE(random_state=7)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
     # Instantiate model logistic regression without cross-validation
     if RUN_LOGREG:
@@ -49,7 +54,7 @@ def taskA():
         logreg = LogisticRegressionModel(solver = SOLVER)
 
         # Make classification prediction on test data
-        y_test_pred = logreg.predict(X_train, y_train, X_test)
+        y_test_pred = logreg.predict(X_train_resampled, y_train_resampled, X_test)
 
         # Evaluate prediction
         print("Evaluation on test set")
@@ -69,7 +74,7 @@ def taskA():
         max_score = 0
         for k in range(1, NEIGHBOURS+1):
             knn_model = KNNModel(neighbours=k)
-            y_pred = knn_model.predict(X_train, y_train, X_test)
+            y_pred = knn_model.predict(X_train_resampled, y_train_resampled, X_test)
             roc_auc = knn_model.evaluate(y_test, y_pred)
             if roc_auc > max_score:
                 best_k = k
@@ -78,7 +83,7 @@ def taskA():
 
         print(f"Best K Value: {best_k}")
         knn_model = KNNModel(neighbours=k)
-        y_pred = knn_model.predict(X_train, y_train, X_test)
+        y_pred = knn_model.predict(X_train_resampled, y_train_resampled, X_test)
 
         print("Evaluation on test set")
         score = roc_auc_score(y_test, y_pred) * 100
