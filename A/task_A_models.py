@@ -7,7 +7,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.svm import SVC
 
-import numpy as np
 from numpy.typing import ArrayLike
 from typing import List, Optional
 import matplotlib.pyplot as plt
@@ -85,7 +84,7 @@ class LogisticRegressionModel:
 
 class KNNModel:
     def __init__(self, neighbours: int):
-        self.model = KNeighborsClassifier(n_neighbors=neighbours)
+        self.model = KNeighborsClassifier(n_neighbors=neighbours, weights="uniform")
 
     def predict(
         self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
