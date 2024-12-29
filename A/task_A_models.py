@@ -5,6 +5,7 @@ import torch.nn as nn
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, roc_auc_score
+from sklearn.svm import SVC
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -340,3 +341,8 @@ class CNNModelTrainer:
         plt.grid()
         plt.title("CNN Training Curve")
         plt.savefig("figures/CNN_Training_Curve.png")
+
+
+class SVMModel:
+    def __init__(self):
+        self.model = SVC()

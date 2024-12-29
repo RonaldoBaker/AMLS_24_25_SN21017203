@@ -8,6 +8,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
 
+from sklearn.metrics import roc_auc_score, classification_report
+from sklearn.svm import SVC
+
 
 def taskA():
     """
@@ -16,9 +19,10 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_KNN = True
-    RUN_LOGREG = True
+    RUN_KNN = False
+    RUN_LOGREG = False
     RUN_CNN = False
+    RUN_SVM = True
 
     # Load BreastMNIST data
     data = load_breastmnist_data(datapath=DATAPATH)
@@ -76,7 +80,21 @@ def taskA():
  
     # ------------------------------------------------------------------- #
 
-    # CNN model
+    # SVM model
+    if RUN_SVM:
+        print("SUPPORT VECTOR MACHINE\n")
+        svm = SVC()
+        svm.fit(X_train, y_train)
+        y_pred = svm.predict(X_test)
+        print("Evaluation on test set")
+        score = roc_auc_score(y_test, y_pred) * 100
+        print(f"ROC-AUC Score: {score: .2f}%\n")
+        print("Classification Report (SVM)")
+        print(classification_report(y_test, y_pred))
+
+    # ------------------------------------------------------------------- #
+    # CNN from scratch
+
     # Define hyperparameters
     BATCH_SIZE = 64
     EPOCHS = 1000
