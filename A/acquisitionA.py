@@ -46,6 +46,6 @@ def display_info(data: ArrayLike):
     # Find how many malignant and normal/benign samples exist
     data_labels = np.concatenate((data["train_labels"], data["test_labels"], data["val_labels"]), axis = 0)
     _, count = np.unique(data_labels, return_counts = True)
-    print(f"There are {count[0]} malignant samples")
-    print(f"There are {count[1]} normal and benign samples\n")
+    print(f"There are {count[0]} malignant samples - label '0'")
+    print(f"There are {count[1]} normal and benign samples - label '1'\n")
 
