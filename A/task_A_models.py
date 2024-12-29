@@ -196,12 +196,13 @@ class CNNModel(nn.Module):
         Defines the CNN model architecture
         """
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2)  # First Conv layer
-        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2)  # Second Conv layer
+        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=1)  # First Conv layer
+        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=1)  # Second Conv layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
         self.relu = nn.ReLU()  # Activation function
-        self.fc1 = nn.Linear(16 * 1 * 1, 8)  # Fully connected layer
-        self.fc2 = nn.Linear(8, 1)  # Single output for binary classification
+        self.fc1 = nn.Linear(16 * 6 * 6, 256)  # Fully connected layer
+        self.fc2 = nn.Linear(256, 128)  # Fully connected layer
+        self.fc3 = nn.Linear(128, 1)  # Single output for binary classification
         self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x: ArrayLike) -> ArrayLike:
@@ -218,7 +219,8 @@ class CNNModel(nn.Module):
         x = self.pool(self.relu(self.conv2(x)))
         x = x.view(x.shape[0], -1)  # Flatten for the fully connected layer
         x = self.relu(self.fc1(x))
-        x = self.sigmoid(self.fc2(x))  # Apply sigmoid function for binary classification
+        x = self.relu(self.fc2(x))
+        x = self.sigmoid(self.fc3(x))  # Apply sigmoid function for binary classification
         return x
 
 
@@ -245,11 +247,11 @@ class CNNModelTrainer:
         self.val_losses = []
         self.val_accuracies = []
 
-    def train(self):
+    def train(self, patience: int = 5):
         # TODO: Comment and add docstring
 
         # Create instance of EarlyStopping class
-        early_stopping = EarlyStopping(patience=30)
+        early_stopping = EarlyStopping(patience=patience)
 
         for epoch in range(self.epochs):
             running_train_loss = 0.0
@@ -282,13 +284,10 @@ class CNNModelTrainer:
                     running_val_loss += loss.item()
                     val_batch_count += 1
 
-                    # Early stopping
-                    early_stopping(loss)
-                    if early_stopping.early_stop:
-                        break
-
+            # Early stopping
+            early_stopping(running_val_loss / val_batch_count)
             if early_stopping.early_stop:
-                print("Early stopping")
+                print(f"Early stopping at epoch: {epoch}")
                 break
 
             self.train_losses.append(running_train_loss / train_batch_count)
@@ -320,7 +319,7 @@ class CNNModelTrainer:
         avg_accuracy = running_accuracy / batch_count
         print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
-        print(classification_report(all_labels, all_predictions))
+        print(classification_report(all_labels, all_predictions, zero_division=0))
 
 
     def plot_training_curve(self):
