@@ -105,15 +105,22 @@ def taskA():
     # ------------------------------------------------------------------- #
 
     # CNN from scratch
+
     # Define hyperparameters
     BATCH_SIZE = 64
     EPOCHS = 1000
     LEARNING_RATE = 0.001
+    RANDOM_SEED = 7
+
+    torch.manual_seed(RANDOM_SEED)
+    torch.cuda.manual_seed(RANDOM_SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     if RUN_CNN:
         if torch.cuda.is_available():
             # Define device if dedicated GPU is available
-            DEVICE_NUM = 0
+            DEVICE_NUM = 1
             torch.cuda.set_device(DEVICE_NUM)
             DEVICE = torch.device(f"cuda:{DEVICE_NUM}")
         else:
@@ -131,13 +138,13 @@ def taskA():
 
         # Create DataLoaders 
         train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
-        train_loader = DataLoader(train_set, batch_size=len(train_data_tensor), shuffle=True, drop_last=True)
+        train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
         test_set = [(test_data_tensor[i], test_labels_tensor[i]) for i in range(len(test_data_tensor))]
-        test_loader = DataLoader(test_set, batch_size=len(test_data_tensor), shuffle=True, drop_last=True)
+        test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
         val_set = [(val_data_tensor[i], val_labels_tensor[i]) for i in range(len(val_data_tensor))]
-        val_loader = DataLoader(val_set, batch_size=len(val_data_tensor), shuffle=True, drop_last=True)
+        val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
         # Instantiate CNN model and move to device being used
         print("CNN\n")
@@ -150,6 +157,6 @@ def taskA():
 
         # Train model
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
-        cnn_trainer.train()
+        cnn_trainer.train(patience=3)
         cnn_trainer.evaluate()
         cnn_trainer.plot_training_curve()
