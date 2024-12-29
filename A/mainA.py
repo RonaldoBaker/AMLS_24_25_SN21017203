@@ -19,7 +19,7 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_KNN = False
+    RUN_KNN = True
     RUN_LOGREG = False
     RUN_CNN = False
     RUN_SVM = True
@@ -65,12 +65,24 @@ def taskA():
         accuracies = []
         NEIGHBOURS = 30
 
+        best_k = 0
+        max_score = 0
         for k in range(1, NEIGHBOURS+1):
             knn_model = KNNModel(neighbours=k)
             y_pred = knn_model.predict(X_train, y_train, X_test)
+            roc_auc_score = knn_model.evaluate(y_test, y_pred)
+            if roc_auc_score > max_score:
+                best_k = k
+                max_score = roc_auc_score
             accuracies.append(knn_model.evaluate(y_test, y_pred))
 
-        # Plot number of nearest neighbours vs AUC-ROC accuracy
+        print(f"Best K Value: {best_k}")
+        knn_model = KNNModel(neighbours=k)
+        y_pred = knn_model.predict(X_train, y_train, X_test)
+        print(classification_report(y_test, y_pred))
+
+
+        # Plot number of nearest neighbours vs AUC-ROC score
         plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b')
         plt.grid()
         plt.title("Accuracy vs K Value")
@@ -83,7 +95,7 @@ def taskA():
     # SVM model
     if RUN_SVM:
         print("SUPPORT VECTOR MACHINE\n")
-        svm = SVC()
+        svm = SVC(kernel='poly', degree=2, class_weight='balanced', random_state=7)
         svm.fit(X_train, y_train)
         y_pred = svm.predict(X_test)
         print("Evaluation on test set")
