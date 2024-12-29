@@ -44,13 +44,6 @@ def taskA():
         print("LOGISTIC REGRESSION\n")
         logreg = LogisticRegressionModel(solver = SOLVER)
 
-        # Make prediction with validation data
-        y_val_pred= logreg.predict(X_train, y_train, X_val)
-
-        # Evaluation prediction
-        print("Evaluation on validation set")
-        logreg.evaluate(y_val, y_val_pred)
-
         # Make classification prediction on test data
         y_test_pred = logreg.predict(X_train, y_train, X_test)
 
@@ -59,28 +52,6 @@ def taskA():
         logreg.evaluate(y_test, y_test_pred)
         print("Classification Report (Logistic Regression)")
         logreg.report(y_test, y_test_pred)
-
-        # ------------------------------------------------------------------- #
-
-        # Instantiate logistic regression model with cross-validation
-        print("LOGISTIC REGRESSION WITH CROSS-VALIDATION\n")
-        logreg_cv = LogisticRegressionModel(solver = SOLVER,
-                                            with_cv = True,
-                                            Cs = [0.001, 0.01, 0.1, 1, 10, 100],
-                                            cv = 5,
-                                            scoring = "roc_auc",
-                                            max_iter = 1000)
-        
-        y_val_pred_cv = logreg_cv.predict(X_train, y_train, X_val)
-        
-        # TODO:This value needs to be passed directly to the roc_auc_score function, not the value above
-        # y_val_auc_pred = logreg_cv.model.predict_proba(processed_val_data)[:, 1]
-
-        print("Evaluation on validation set")
-        logreg_cv.evaluate(y_val, y_val_pred_cv)
-
-        print("Classification Report (Logistic Regression with Cross-Validation)")
-        logreg_cv.report(y_val, y_val_pred_cv)
 
     # ------------------------------------------------------------------- #
 
@@ -105,8 +76,7 @@ def taskA():
  
     # ------------------------------------------------------------------- #
 
-    # CNN from scratch
-
+    # CNN model
     # Define hyperparameters
     BATCH_SIZE = 64
     EPOCHS = 1000
