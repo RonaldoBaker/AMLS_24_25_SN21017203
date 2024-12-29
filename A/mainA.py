@@ -70,15 +70,20 @@ def taskA():
         for k in range(1, NEIGHBOURS+1):
             knn_model = KNNModel(neighbours=k)
             y_pred = knn_model.predict(X_train, y_train, X_test)
-            roc_auc_score = knn_model.evaluate(y_test, y_pred)
-            if roc_auc_score > max_score:
+            roc_auc = knn_model.evaluate(y_test, y_pred)
+            if roc_auc > max_score:
                 best_k = k
-                max_score = roc_auc_score
+                max_score = roc_auc
             accuracies.append(knn_model.evaluate(y_test, y_pred))
 
         print(f"Best K Value: {best_k}")
         knn_model = KNNModel(neighbours=k)
         y_pred = knn_model.predict(X_train, y_train, X_test)
+
+        print("Evaluation on test set")
+        score = roc_auc_score(y_test, y_pred) * 100
+        print(f"ROC-AUC Score: {score: .2f}%\n")
+
         print(classification_report(y_test, y_pred))
 
 
