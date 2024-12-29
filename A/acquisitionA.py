@@ -33,7 +33,7 @@ def load_breastmnist_data(datapath: str) -> Dict[str, ArrayLike]:
             "test_labels": test_labels}
 
 
-def analyse(data: ArrayLike):
+def display_info(data: ArrayLike):
     # Get dataset info
     dataset = BreastMNIST(split="train")
     print(dataset.info, "\n")
