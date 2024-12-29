@@ -1,5 +1,6 @@
 # Import dependencies
-from A.acquisitionA import load_breastmnist_data, analyse
+from A.acquisitionA import load_breastmnist_data, display_info
+from A.preprocessingA import preprocess
 from A.task_A_models import LogisticRegressionModel, KNNModel, CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
@@ -15,15 +16,15 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_KNN = False
-    RUN_LOGREG = False
-    RUN_CNN = True
+    RUN_KNN = True
+    RUN_LOGREG = True
+    RUN_CNN = False
 
     # Load BreastMNIST data
     data = load_breastmnist_data(datapath=DATAPATH)
 
-    # Analyse data
-    analyse(data)
+    # Display data
+    display_info(data)
 
     # Separate data
     train_data = data["train_data"]
@@ -33,31 +34,31 @@ def taskA():
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
+    # Preprocess data
+    data, labels = preprocess(data = [train_data, val_data, test_data], labels = [train_labels, val_labels, test_labels])
+    X_train, X_val, X_test = data[0], data[1], data[2]
+    y_train, y_val, y_test = labels[0], labels[1], labels[2]
+
     # Instantiate model logistic regression without cross-validation
     if RUN_LOGREG:
         print("LOGISTIC REGRESSION\n")
         logreg = LogisticRegressionModel(solver = SOLVER)
 
-        # Preprocess data
-        processed_data, processed_labels = logreg.preprocess(data = [train_data, val_data, test_data], labels = [train_labels, val_labels, test_labels])
-        processed_train_data, processed_val_data, processed_test_data = processed_data[0], processed_data[1], processed_data[2]
-        processed_train_labels, processed_val_labels, processed_test_labels = processed_labels[0], processed_labels[1], processed_labels[2]
-
         # Make prediction with validation data
-        y_val_pred= logreg.predict(processed_train_data, processed_train_labels, processed_val_data)
+        y_val_pred= logreg.predict(X_train, y_train, X_val)
 
         # Evaluation prediction
         print("Evaluation on validation set")
-        logreg.evaluate(processed_val_labels, y_val_pred)
+        logreg.evaluate(y_val, y_val_pred)
 
         # Make classification prediction on test data
-        y_test_pred = logreg.predict(processed_train_data, processed_train_labels, processed_test_data)
+        y_test_pred = logreg.predict(X_train, y_train, X_test)
 
         # Evaluate prediction
         print("Evaluation on test set")
-        logreg.evaluate(processed_test_labels, y_test_pred)
+        logreg.evaluate(y_test, y_test_pred)
         print("Classification Report (Logistic Regression)")
-        logreg.report(processed_test_labels, y_test_pred)
+        logreg.report(y_test, y_test_pred)
 
         # ------------------------------------------------------------------- #
 
@@ -70,16 +71,16 @@ def taskA():
                                             scoring = "roc_auc",
                                             max_iter = 1000)
         
-        y_val_pred_cv = logreg_cv.predict(processed_train_data, processed_train_labels, processed_val_data)
+        y_val_pred_cv = logreg_cv.predict(X_train, y_train, X_val)
         
         # TODO:This value needs to be passed directly to the roc_auc_score function, not the value above
         # y_val_auc_pred = logreg_cv.model.predict_proba(processed_val_data)[:, 1]
 
         print("Evaluation on validation set")
-        logreg_cv.evaluate(processed_val_labels, y_val_pred_cv)
+        logreg_cv.evaluate(y_val, y_val_pred_cv)
 
         print("Classification Report (Logistic Regression with Cross-Validation)")
-        logreg_cv.report(processed_val_labels, y_val_pred_cv)
+        logreg_cv.report(y_val, y_val_pred_cv)
 
     # ------------------------------------------------------------------- #
 
@@ -91,8 +92,8 @@ def taskA():
 
         for k in range(1, NEIGHBOURS+1):
             knn_model = KNNModel(neighbours=k)
-            y_pred = knn_model.predict(processed_train_data, processed_train_labels, processed_test_data)
-            accuracies.append(knn_model.evaluate(processed_test_labels, y_pred))
+            y_pred = knn_model.predict(X_train, y_train, X_test)
+            accuracies.append(knn_model.evaluate(y_test, y_pred))
 
         # Plot number of nearest neighbours vs AUC-ROC accuracy
         plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b')

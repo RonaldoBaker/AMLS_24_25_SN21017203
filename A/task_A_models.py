@@ -43,31 +43,31 @@ class LogisticRegressionModel:
         else:
             self.model = LogisticRegression(solver=solver)
 
-    def preprocess(
-        self, data: List[ArrayLike], labels: List[ArrayLike]
-    ) -> tuple[List[ArrayLike], List[ArrayLike]]:
-        """
-        Prepares data for logistic regression model
+    # def preprocess(
+    #     self, data: List[ArrayLike], labels: List[ArrayLike]
+    # ) -> tuple[List[ArrayLike], List[ArrayLike]]:
+    #     """
+    #     Prepares data for logistic regression model
 
-        Arg(s):
-        - data (List[ArrayLike]): The data to be preprocessed
-        - labels (List[ArrayLike]): The labels of the data to be preprocessed
+    #     Arg(s):
+    #     - data (List[ArrayLike]): The data to be preprocessed
+    #     - labels (List[ArrayLike]): The labels of the data to be preprocessed
 
-        Returns:
-        - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
-        """
-        for i in range(len(data)):
-            # Reshape data from 3D to 2D numpy arrays
-            data[i] = data[i].reshape(data[i].shape[0], -1)
+    #     Returns:
+    #     - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
+    #     """
+    #     for i in range(len(data)):
+    #         # Reshape data from 3D to 2D numpy arrays
+    #         data[i] = data[i].reshape(data[i].shape[0], -1)
 
-            # Normalise pixel values to (0, 1)
-            data[i] = data[i] / 255.0
+    #         # Normalise pixel values to (0, 1)
+    #         data[i] = data[i] / 255.0
 
-        for i in range(len(labels)):
-            # Flatten labels
-            labels[i] = np.ravel(labels[i])
+    #     for i in range(len(labels)):
+    #         # Flatten labels
+    #         labels[i] = np.ravel(labels[i])
 
-        return data, labels
+    #     return data, labels
 
     def predict(
         self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
@@ -112,31 +112,31 @@ class KNNModel:
     def __init__(self, neighbours: int):
         self.model = KNeighborsClassifier(n_neighbors=neighbours)
 
-    def preprocess(
-        self, data: List[ArrayLike], labels: List[ArrayLike]
-    ) -> tuple[List[ArrayLike], List[ArrayLike]]:
-        """
-        Prepares data for logistic regression model
+    # def preprocess(
+    #     self, data: List[ArrayLike], labels: List[ArrayLike]
+    # ) -> tuple[List[ArrayLike], List[ArrayLike]]:
+    #     """
+    #     Prepares data for logistic regression model
 
-        Arg(s):
-        - data (List[ArrayLike]): The data to be preprocessed
-        - labels (List[ArrayLike]): The labels of the data to be preprocessed
+    #     Arg(s):
+    #     - data (List[ArrayLike]): The data to be preprocessed
+    #     - labels (List[ArrayLike]): The labels of the data to be preprocessed
 
-        Returns:
-        - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
-        """
-        for i in range(len(data)):
-            # Reshape data from 3D to 2D numpy arrays
-            data[i] = data[i].reshape(data[i].shape[0], -1)
+    #     Returns:
+    #     - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
+    #     """
+    #     for i in range(len(data)):
+    #         # Reshape data from 3D to 2D numpy arrays
+    #         data[i] = data[i].reshape(data[i].shape[0], -1)
 
-            # Normalise pixel values to (0, 1)
-            data[i] = data[i] / 255.0
+    #         # Normalise pixel values to (0, 1)
+    #         data[i] = data[i] / 255.0
 
-        for i in range(len(labels)):
-            # Flatten labels
-            labels[i] = np.ravel(labels[i])
+    #     for i in range(len(labels)):
+    #         # Flatten labels
+    #         labels[i] = np.ravel(labels[i])
 
-        return data, labels
+    #     return data, labels
 
     def predict(
         self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
