@@ -198,11 +198,14 @@ class CNNModel(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=1)  # First Conv layer
         self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=1)  # Second Conv layer
+        self.conv3 = nn.Conv2d(16, 32, kernel_size=2, stride=1)  # Third Conv layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
         self.relu = nn.ReLU()  # Activation function
-        self.fc1 = nn.Linear(16 * 6 * 6, 256)  # Fully connected layer
-        self.fc2 = nn.Linear(256, 128)  # Fully connected layer
-        self.fc3 = nn.Linear(128, 1)  # Single output for binary classification
+        self.fc1 = nn.Linear(32 * 5 * 5, 512)  # Fully connected layer
+        self.fc2 = nn.Linear(512, 256)  # Fully connected layer
+        self.fc3 = nn.Linear(256, 128)  # Fully connected layer
+        self.fc4 = nn.Linear(128, 1)  # Single output for binary classification
+        self.dropout = nn.Dropout(0.4)  # 30% dropout rate
         self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x: ArrayLike) -> ArrayLike:
@@ -217,10 +220,15 @@ class CNNModel(nn.Module):
         """
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
+        x = self.relu(self.conv3(x))
         x = x.view(x.shape[0], -1)  # Flatten for the fully connected layer
         x = self.relu(self.fc1(x))
+        x = self.dropout(x)
         x = self.relu(self.fc2(x))
-        x = self.sigmoid(self.fc3(x))  # Apply sigmoid function for binary classification
+        x = self.dropout(x)
+        x = self.relu(self.fc3(x))
+        x = self.dropout(x)
+        x = self.sigmoid(self.fc4(x))  # Apply sigmoid function for binary classification
         return x
 
 
@@ -324,8 +332,8 @@ class CNNModelTrainer:
 
     def plot_training_curve(self):
         # Plot the training curve
-        plt.plot(self.train_losses, label="Training Loss")
-        plt.plot(self.val_losses, label="Validation Loss")
+        plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss")
+        plt.plot(range(1, len(self.val_losses)+1, 1), self.val_losses, label="Validation Loss")
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
         plt.legend()
