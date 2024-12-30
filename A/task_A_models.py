@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 
-from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.svm import SVC
@@ -11,76 +10,6 @@ from sklearn.svm import SVC
 from numpy.typing import ArrayLike
 from typing import List, Optional
 import matplotlib.pyplot as plt
-
-
-class LogisticRegressionModel:
-    def __init__(
-        self,
-        solver: str,
-        with_cv: bool = False,
-        Cs: Optional[List[float]] = None,
-        cv: Optional[int] = None,
-        scoring: Optional[str] = None,
-        max_iter: Optional[int] = None,
-    ):
-        """
-        Initialises a logistic regression model object.
-
-        Arg(s):
-        - solver (str): The type of solver to use in the logistic regression model.
-        - with_cv (boolean): If True, creates a logistic regression model with cross-validation. Default is False.
-
-        - Cs (Optional[List[float]]): List of C values (regularisation strengths).
-        - cv (Optional[int]): The number of cross-validation folds.
-        - scoring (Optional[str]): The metric to optimise.
-        - max_iter (Optional[int]): The maximum number of iterations for convergence.
-        """
-        self.solver = solver
-        self.with_cv = with_cv
-        if self.with_cv:
-            self.model = LogisticRegressionCV(
-                Cs=Cs, cv=cv, scoring=scoring, max_iter=max_iter
-            )
-        else:
-            self.model = LogisticRegression(solver=solver)
-
-    def predict(
-        self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
-    ) -> ArrayLike:
-        """
-        Trains the logistic model and makes classification predictions from the test data
-
-        Arg(s):
-        - x_train (ArrayLike): The data with which the model is trained
-        - y_train (ArrayLike): The labels of the data with which the model is trained
-        - x_test (ArrayLike): The data with which to make a classification prediction after fitting the model
-
-        Returns:
-        - ArrayLike: Array of predictions made from test data
-        """
-        # Train and fit the model
-        self.model.fit(x_train, y_train)
-
-        # Predict new values
-        y_pred = self.model.predict(x_test)
-
-        return y_pred
-
-    def evaluate(self, y_true: ArrayLike, y_pred: ArrayLike):
-        """
-        Evaluates model accuracy
-
-        Arg(s):
-        - y_true (ArrayLike): The test data to be compared
-        - y_pred (ArrayLike): The predicted data to be compared
-        """
-        print(f"ROC-AUC Score: {roc_auc_score(y_true, y_pred) * 100: .2f}%\n")
-        if self.with_cv:
-            # Evaluating logistic regression with cv
-            print(f"Best regularisation value (C): {self.model.C_[0]}\n")
-
-    def report(self, y_true: ArrayLike, y_pred: ArrayLike):
-        print(classification_report(y_true, y_pred))
 
 
 class KNNModel:
@@ -154,7 +83,7 @@ class CNNModel(nn.Module):
         self.fc2 = nn.Linear(512, 256)  # Fully connected layer
         self.fc3 = nn.Linear(256, 128)  # Fully connected layer
         self.fc4 = nn.Linear(128, 1)  # Single output for binary classification
-        self.dropout = nn.Dropout(0.4)  # 30% dropout rate
+        self.dropout = nn.Dropout(0.1)  # 30% dropout rate
         self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x: ArrayLike) -> ArrayLike:
@@ -281,6 +210,7 @@ class CNNModelTrainer:
 
     def plot_training_curve(self):
         # Plot the training curve
+        plt.figure()
         plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss")
         plt.plot(range(1, len(self.val_losses)+1, 1), self.val_losses, label="Validation Loss")
         plt.xlabel("Epoch")

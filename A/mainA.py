@@ -8,6 +8,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
 
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.svm import SVC
 from imblearn.over_sampling import SMOTE
@@ -21,8 +23,8 @@ def taskA():
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
     RUN_LOGREG = True
-    RUN_KNN = True
-    RUN_SVM = True
+    RUN_KNN = False
+    RUN_SVM = False
     RUN_CNN = False
 
     # Load BreastMNIST data
@@ -48,19 +50,19 @@ def taskA():
     smote = SMOTE(random_state=7)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
-    # Instantiate model logistic regression without cross-validation
+    # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
         print("LOGISTIC REGRESSION\n")
-        logreg = LogisticRegressionModel(solver = SOLVER)
-
-        # Make classification prediction on test data
-        y_test_pred = logreg.predict(X_train_resampled, y_train_resampled, X_test)
+        logreg = LogisticRegression(solver = SOLVER) # Create model
+        logreg.fit(X_train_resampled, y_train_resampled) # Fit model
+        y_pred = logreg.predict(X_test) # Make predictions
 
         # Evaluate prediction
         print("Evaluation on test set")
-        logreg.evaluate(y_test, y_test_pred)
+        score = roc_auc_score(y_test, y_pred) * 100
+        print(f"ROC-AUC Score: {score: .2f}%\n")
         print("Classification Report (Logistic Regression)")
-        logreg.report(y_test, y_test_pred)
+        print(classification_report(y_test, y_pred))
 
     # ------------------------------------------------------------------- #
 
@@ -93,6 +95,7 @@ def taskA():
 
 
         # Plot number of nearest neighbours vs AUC-ROC score
+        plt.figure()
         plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b')
         plt.grid()
         plt.title("Accuracy vs K Value")
