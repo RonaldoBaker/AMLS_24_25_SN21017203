@@ -20,9 +20,9 @@ def taskA():
     """
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
-    SOLVER = "lbfgs"
-    RUN_LOGREG = False
-    RUN_KNN = True
+    SOLVER = "saga"
+    RUN_LOGREG = True
+    RUN_KNN = False
     RUN_SVM = False
     RUN_CNN = False
 
@@ -53,7 +53,7 @@ def taskA():
     # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
         print("LOGISTIC REGRESSION\n")
-        logreg = LogisticRegression(solver = SOLVER) # Create model
+        logreg = LogisticRegression(solver = SOLVER, class_weight="balanced") # Create model
         logreg.fit(X_train_resampled, y_train_resampled) # Fit model
         y_pred = logreg.predict(X_test) # Make predictions
 

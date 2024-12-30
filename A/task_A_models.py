@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 from sklearn.metrics import classification_report, roc_auc_score
-from sklearn.svm import SVC
 from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 
