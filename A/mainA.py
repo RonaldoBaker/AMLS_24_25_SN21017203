@@ -1,6 +1,6 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, display_info
-from A.preprocessingA import preprocess
+from A.preprocessingA import preprocess_for_traditional, balance_data, scale, flatten_labels
 from A.task_A_models import CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
@@ -20,10 +20,10 @@ def taskA():
     """
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
-    SOLVER = "saga"
+    SOLVER = "lbfgs"
     RUN_LOGREG = True
-    RUN_KNN = False
-    RUN_SVM = False
+    RUN_KNN = True
+    RUN_SVM = True
     RUN_CNN = False
 
     # Load BreastMNIST data
@@ -40,21 +40,16 @@ def taskA():
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
-    # Preprocess train and test data for traditional machine learning models
-    data, labels = preprocess(data = [train_data, test_data], labels = [train_labels, test_labels])
-    X_train, X_test = data[0], data[1]
-    y_train, y_test = labels[0], labels[1]
-
-    # Apply SMOTE to balance the dataset
-    smote = SMOTE(random_state=7)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+    data, labels = preprocess_for_traditional(data = [train_data, test_data], labels = [train_labels, test_labels])
+    X_train_balanced, X_test = data[0], data[1]
+    y_train_balanced, y_test = labels[0], labels[1]
 
     # ------------------------------------------------------------------- #
     # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
         print("LOGISTIC REGRESSION\n")
         logreg = LogisticRegression(solver = SOLVER, class_weight="balanced") # Create model
-        logreg.fit(X_train_resampled, y_train_resampled) # Fit model
+        logreg.fit(X_train_balanced, y_train_balanced) # Fit model
         y_pred = logreg.predict(X_test) # Make predictions
 
         # Evaluate prediction
@@ -76,7 +71,7 @@ def taskA():
         for k in range(1, NEIGHBOURS+1):
             knn_model = KNeighborsClassifier(n_neighbors=k, weights="uniform")
             # knn_model = KNNModel(neighbours=k)
-            knn_model.fit(X_train_resampled, y_train_resampled) # Fit model
+            knn_model.fit(X_train_balanced, y_train_balanced) # Fit model
             y_pred = knn_model.predict(X_test) # Make predictions
 
             # Evaluation prediction
@@ -88,7 +83,7 @@ def taskA():
 
         print(f"Best K Value: {best_k}")
         knn_model = KNeighborsClassifier(n_neighbors=best_k, weights="uniform")
-        knn_model.fit(X_train_resampled, y_train_resampled)
+        knn_model.fit(X_train_balanced, y_train_balanced)
         y_pred = knn_model.predict(X_test)
 
         # Evaluate prediction for best K Value
@@ -113,7 +108,7 @@ def taskA():
     if RUN_SVM:
         print("SUPPORT VECTOR MACHINE\n")
         svm = SVC(kernel='poly', degree=2, class_weight='balanced', random_state=7)
-        svm.fit(X_train, y_train) # Fit model
+        svm.fit(X_train_balanced, y_train_balanced) # Fit model
         y_pred = svm.predict(X_test) # Make predictions
 
         # Evaluate prediction
@@ -146,6 +141,22 @@ def taskA():
         else:
             DEVICE = torch.device("cpu")
 
+        # Reshape train data for CNN
+        X_train = X_train_balanced.reshape(X_train_balanced.shape[0], 28, 28)
+        y_train = y_train_balanced.reshape(y_train_balanced.shape[0], 1)
+
+
+        X_test = X_test.reshape(X_test.shape[0], 28, 28)
+        y_test = y_test.reshape(y_test.shape[0], 1)
+        print(test_labels.shape)
+        
+
+        # Scale test and validation sets
+        # train_data_scaled =
+        test_data_scaled = test_data / 255.0
+        val_data_scaled = val_data / 255.0
+
+
         # Create tensors and add dimension for greyscale image data, and make labels 2D
         train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
         train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
@@ -177,6 +188,6 @@ def taskA():
 
         # Train model
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
-        cnn_trainer.train(patience=3)
-        cnn_trainer.evaluate()
-        cnn_trainer.plot_training_curve()
+        # cnn_trainer.train(patience=3)
+        # cnn_trainer.evaluate()
+        # cnn_trainer.plot_training_curve()
