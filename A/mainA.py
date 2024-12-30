@@ -1,6 +1,6 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, display_info
-from A.preprocessingA import preprocess_for_traditional, balance_data, scale, flatten_labels
+from A.preprocessingA import preprocess_for_traditional, preprocess_for_cnn
 from A.task_A_models import CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
@@ -11,7 +11,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.svm import SVC
-from imblearn.over_sampling import SMOTE
 
 
 def taskA():
@@ -21,10 +20,10 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_LOGREG = True
-    RUN_KNN = True
-    RUN_SVM = True
-    RUN_CNN = False
+    RUN_LOGREG = False
+    RUN_KNN = False
+    RUN_SVM = False
+    RUN_CNN = True
 
     # Load BreastMNIST data
     data = load_breastmnist_data(datapath=DATAPATH)
@@ -40,6 +39,7 @@ def taskA():
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
+    # Preprocess data for traditional machine learning models
     data, labels = preprocess_for_traditional(data = [train_data, test_data], labels = [train_labels, test_labels])
     X_train_balanced, X_test = data[0], data[1]
     y_train_balanced, y_test = labels[0], labels[1]
@@ -132,6 +132,11 @@ def taskA():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+    # Preprocess data for CNN model
+    data, labels = preprocess_for_cnn(data = [train_data, test_data, val_data], labels = [train_labels, test_labels, val_labels])
+    X_train_balanced, X_test, X_val = data[0], data[1], data[2]
+    y_train_balanced, y_test, y_val = labels[0], labels[1], labels[2]
+
     if RUN_CNN:
         if torch.cuda.is_available():
             # Define device if dedicated GPU is available
@@ -141,31 +146,15 @@ def taskA():
         else:
             DEVICE = torch.device("cpu")
 
-        # Reshape train data for CNN
-        X_train = X_train_balanced.reshape(X_train_balanced.shape[0], 28, 28)
-        y_train = y_train_balanced.reshape(y_train_balanced.shape[0], 1)
-
-
-        X_test = X_test.reshape(X_test.shape[0], 28, 28)
-        y_test = y_test.reshape(y_test.shape[0], 1)
-        print(test_labels.shape)
-        
-
-        # Scale test and validation sets
-        # train_data_scaled =
-        test_data_scaled = test_data / 255.0
-        val_data_scaled = val_data / 255.0
-
-
         # Create tensors and add dimension for greyscale image data, and make labels 2D
-        train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
-        train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
+        train_data_tensor = torch.tensor(X_train_balanced, device=DEVICE, dtype=torch.float32)
+        train_labels_tensor = torch.tensor(y_train_balanced, device=DEVICE, dtype=torch.float32)
 
-        test_data_tensor = torch.tensor(test_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
-        test_labels_tensor = torch.tensor(test_labels, device=DEVICE, dtype=torch.float32)
+        test_data_tensor = torch.tensor(X_test, device=DEVICE, dtype=torch.float32)
+        test_labels_tensor = torch.tensor(y_test, device=DEVICE, dtype=torch.float32)
 
-        val_data_tensor = torch.tensor(val_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
-        val_labels_tensor = torch.tensor(val_labels, device=DEVICE, dtype=torch.float32)
+        val_data_tensor = torch.tensor(X_val, device=DEVICE, dtype=torch.float32)
+        val_labels_tensor = torch.tensor(y_val, device=DEVICE, dtype=torch.float32)
 
         # Create DataLoaders 
         train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
@@ -188,6 +177,6 @@ def taskA():
 
         # Train model
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
-        # cnn_trainer.train(patience=3)
-        # cnn_trainer.evaluate()
-        # cnn_trainer.plot_training_curve()
+        cnn_trainer.train(patience=3)
+        cnn_trainer.evaluate()
+        cnn_trainer.plot_training_curve()
