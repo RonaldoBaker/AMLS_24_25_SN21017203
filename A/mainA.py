@@ -1,13 +1,12 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, display_info
 from A.preprocessingA import preprocess
-from A.task_A_models import LogisticRegressionModel, KNNModel, CNNModel, CNNModelTrainer
+from A.task_A_models import CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_auc_score, classification_report
@@ -22,8 +21,8 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_LOGREG = True
-    RUN_KNN = False
+    RUN_LOGREG = False
+    RUN_KNN = True
     RUN_SVM = False
     RUN_CNN = False
 
@@ -50,6 +49,7 @@ def taskA():
     smote = SMOTE(random_state=7)
     X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
 
+    # ------------------------------------------------------------------- #
     # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
         print("LOGISTIC REGRESSION\n")
@@ -65,7 +65,6 @@ def taskA():
         print(classification_report(y_test, y_pred))
 
     # ------------------------------------------------------------------- #
-
     # KNN model - Finding the optimum value of K (the number of nearest neighbours)
     if RUN_KNN:
         print("K-NEAREST NEIGHBOURS\n")
@@ -75,24 +74,30 @@ def taskA():
         best_k = 0
         max_score = 0
         for k in range(1, NEIGHBOURS+1):
-            knn_model = KNNModel(neighbours=k)
-            y_pred = knn_model.predict(X_train_resampled, y_train_resampled, X_test)
-            roc_auc = knn_model.evaluate(y_test, y_pred)
-            if roc_auc > max_score:
+            knn_model = KNeighborsClassifier(n_neighbors=k, weights="uniform")
+            # knn_model = KNNModel(neighbours=k)
+            knn_model.fit(X_train_resampled, y_train_resampled) # Fit model
+            y_pred = knn_model.predict(X_test) # Make predictions
+
+            # Evaluation prediction
+            score = roc_auc_score(y_test, y_pred) * 100
+            if score > max_score: # Track best K value
                 best_k = k
-                max_score = roc_auc
-            accuracies.append(knn_model.evaluate(y_test, y_pred))
+                max_score = score
+            accuracies.append(score)
 
         print(f"Best K Value: {best_k}")
-        knn_model = KNNModel(neighbours=k)
-        y_pred = knn_model.predict(X_train_resampled, y_train_resampled, X_test)
+        knn_model = KNeighborsClassifier(n_neighbors=best_k, weights="uniform")
+        knn_model.fit(X_train_resampled, y_train_resampled)
+        y_pred = knn_model.predict(X_test)
 
+        # Evaluate prediction for best K Value
         print("Evaluation on test set")
         score = roc_auc_score(y_test, y_pred) * 100
         print(f"ROC-AUC Score: {score: .2f}%\n")
 
+        print("Classification Report (K-NEAREST NEIGHBOURS)")
         print(classification_report(y_test, y_pred))
-
 
         # Plot number of nearest neighbours vs AUC-ROC score
         plt.figure()
@@ -104,13 +109,14 @@ def taskA():
         plt.savefig("figures/KNN_Accuracy_vs_K.png")
  
     # ------------------------------------------------------------------- #
-
     # SVM model
     if RUN_SVM:
         print("SUPPORT VECTOR MACHINE\n")
         svm = SVC(kernel='poly', degree=2, class_weight='balanced', random_state=7)
-        svm.fit(X_train, y_train)
-        y_pred = svm.predict(X_test)
+        svm.fit(X_train, y_train) # Fit model
+        y_pred = svm.predict(X_test) # Make predictions
+
+        # Evaluate prediction
         print("Evaluation on test set")
         score = roc_auc_score(y_test, y_pred) * 100
         print(f"ROC-AUC Score: {score: .2f}%\n")
@@ -118,14 +124,14 @@ def taskA():
         print(classification_report(y_test, y_pred))
 
     # ------------------------------------------------------------------- #
-    # CNN from scratch
-
+    # CNN model
     # Define hyperparameters
     BATCH_SIZE = 64
     EPOCHS = 1000
     LEARNING_RATE = 0.001
     RANDOM_SEED = 7
 
+    # Set random seed for reproducibility
     torch.manual_seed(RANDOM_SEED)
     torch.cuda.manual_seed(RANDOM_SEED)
     torch.backends.cudnn.deterministic = True

@@ -1,52 +1,10 @@
 # Import dependencies
 import torch
 import torch.nn as nn
-
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.svm import SVC
-
-
 from numpy.typing import ArrayLike
-from typing import List, Optional
 import matplotlib.pyplot as plt
-
-
-class KNNModel:
-    def __init__(self, neighbours: int):
-        self.model = KNeighborsClassifier(n_neighbors=neighbours, weights="uniform")
-
-    def predict(
-        self, x_train: ArrayLike, y_train: ArrayLike, x_test: ArrayLike
-    ) -> ArrayLike:
-        """
-        Trains the logistic model and makes classification predictions from the test data
-
-        Arg(s):
-        - x_train (ArrayLike): The data with which the model is trained
-        - y_train (ArrayLike): The labels of the data with which the model is trained
-        - x_test (ArrayLike): The data with which to make a classification prediction after fitting the model
-
-        Returns:
-        - ArrayLike: Array of predictions made from test data
-        """
-        # Train and fit the model
-        self.model.fit(x_train, y_train)
-
-        # Predict new values
-        y_pred = self.model.predict(x_test)
-
-        return y_pred
-
-    def evaluate(self, y_true: ArrayLike, y_pred: ArrayLike):
-        """
-        Evaluates model accuracy
-
-        Arg(s):
-        - y_true (ArrayLike): The test data to be compared
-        - y_pred (ArrayLike): The predicted data to be compared
-        """
-        return roc_auc_score(y_true, y_pred)
 
 
 class EarlyStopping:
