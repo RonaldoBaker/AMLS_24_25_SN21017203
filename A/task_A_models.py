@@ -40,7 +40,7 @@ class CNNModel(nn.Module):
         self.fc2 = nn.Linear(512, 256)  # Fully connected layer
         self.fc3 = nn.Linear(256, 128)  # Fully connected layer
         self.fc4 = nn.Linear(128, 1)  # Single output for binary classification
-        self.dropout = nn.Dropout(0.1)  # 30% dropout rate
+        self.dropout = nn.Dropout(0.5)  # Dropout rate
         self.sigmoid = nn.Sigmoid()  # Activation function
 
     def forward(self, x: ArrayLike) -> ArrayLike:

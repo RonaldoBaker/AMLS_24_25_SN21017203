@@ -147,14 +147,14 @@ def taskA():
             DEVICE = torch.device("cpu")
 
         # Create tensors and add dimension for greyscale image data, and make labels 2D
-        train_data_tensor = torch.tensor(X_train_balanced, device=DEVICE, dtype=torch.float32)
-        train_labels_tensor = torch.tensor(y_train_balanced, device=DEVICE, dtype=torch.float32)
+        train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
+        train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
 
-        test_data_tensor = torch.tensor(X_test, device=DEVICE, dtype=torch.float32)
-        test_labels_tensor = torch.tensor(y_test, device=DEVICE, dtype=torch.float32)
+        test_data_tensor = torch.tensor(test_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
+        test_labels_tensor = torch.tensor(test_labels, device=DEVICE, dtype=torch.float32)
 
-        val_data_tensor = torch.tensor(X_val, device=DEVICE, dtype=torch.float32)
-        val_labels_tensor = torch.tensor(y_val, device=DEVICE, dtype=torch.float32)
+        val_data_tensor = torch.tensor(val_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)  
+        val_labels_tensor = torch.tensor(val_labels, device=DEVICE, dtype=torch.float32)
 
         # Create DataLoaders 
         train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]

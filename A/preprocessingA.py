@@ -45,29 +45,9 @@ def preprocess_for_cnn(data: tuple[ArrayLike, ArrayLike], labels: ArrayLike) -> 
     Returns:
     - tuple[List[ArrayLike], List[ArrayLike]]: The preprocessed train and test data and labels
     """
-    # Normalise pixel values to (0, 1)
-    for i in range(len(data)):
-        # Reshape data from 3D to 2D numpy arrays for traditional machine learning models
-        # data[i] = data[i].reshape(data[i].shape[0], -1)
-
-        # Normalise pixel values to (0, 1)
-        data[i] = data[i] / 255.0
-       
-
-    # # Flatten training data and training labels for SMOTE
-    # flattened_train_data = data[0].reshape(data[0].shape[0], -1)
-    # flattened_train_labels = np.ravel(labels[0])
-
-    # # Balance the training dataset using the Synthetic Minority Over-sampling Technique (SMOTE)
-    # smote = SMOTE(random_state=7)
-    # data[0], labels[0] = smote.fit_resample(flattened_train_data, flattened_train_labels)
-
     # Reshape data for CNN
     for i in range(len(data)):
         data[i] = data[i].reshape(data[i].shape[0], 1, 28, 28)
-
-    # # Reshape training labels after SMOTE
-    # labels[0] = labels[0].reshape(labels[0].shape[0], 1)
 
     return data, labels
 
