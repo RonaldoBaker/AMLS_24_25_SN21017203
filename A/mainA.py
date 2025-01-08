@@ -1,7 +1,7 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, display_info
 from A.preprocessingA import preprocess_for_traditional, preprocess_for_cnn
-from A.task_A_models import CNNModel, CNNModelTrainer
+from A.taskAmodels import CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
