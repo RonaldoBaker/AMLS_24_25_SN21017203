@@ -4,7 +4,7 @@ from B.mainB import taskB
 
 def main():
     # Execute Task A - Binary classification
-    taskA()
+    # taskA()
 
     # Execute Task B - Multi-class classification
     taskB()
