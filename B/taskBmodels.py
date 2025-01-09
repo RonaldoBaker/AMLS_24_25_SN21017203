@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from sklearn.metrics import classification_report, roc_auc_score, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score
 from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 
@@ -40,36 +40,6 @@ class CNNModel(nn.Module):
         self.fc4 = nn.Linear(128, 8)  # Output layer for 8 classes
         self.dropout = nn.Dropout(0.5)  # Dropout rate
         self.softmax = nn.Softmax(dim=1)  # Activation function for multi-class classification
-
-        """
-        super(CNNModel, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=2, stride=1)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=2, stride=1)  # Second Conv layer
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=2, stride=1)  # Third Conv layer
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
-        self.relu = nn.ReLU()  # Activation function
-        self.fc1 = nn.Linear(64 * 5 * 5, 512)  # Fully connected layer
-        self.fc2 = nn.Linear(512, 256)  # Fully connected layer
-        self.fc3 = nn.Linear(256, 128)  # Fully connected layer
-        self.fc4 = nn.Linear(128, 1)  # Single output for binary classification
-        self.dropout = nn.Dropout(0.5)  # Dropout rate
-        self.sigmoid = nn.Sigmoid()  # Activation function
-        """
-
-        """
-        super().__init__()
-        self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=1)
-        self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=1)  # Second Conv layer
-        self.conv3 = nn.Conv2d(16, 32, kernel_size=2, stride=1)  # Third Conv layer
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
-        self.relu = nn.ReLU()  # Activation function
-        self.fc1 = nn.Linear(32 * 5 * 5, 512)  # Fully connected layer
-        self.fc2 = nn.Linear(512, 256)  # Fully connected layer
-        self.fc3 = nn.Linear(256, 128)  # Fully connected layer
-        self.fc4 = nn.Linear(128, 1)  # Single output for binary classification
-        self.dropout = nn.Dropout(0.5)  # Dropout rate
-        self.sigmoid = nn.Sigmoid()  # Activation function
-        """
     
     def forward(self, x: ArrayLike) -> ArrayLike:
         """
@@ -156,16 +126,6 @@ class CNNModelTrainer:
                     running_val_accuracy += accuracy
                     running_val_loss += loss.item()
                     val_batch_count += 1
-
-                    # self.all_predictions.extend(predicted.cpu())
-                    # self.all_labels.extend(labels.cpu().numpy())
-                    # accuracy = accuracy_score(self.all_labels, self.all_predictions)
-                    # predicted = (outputs > 0.5).float()
-                    # accuracy = roc_auc_score(labels.cpu(), predicted.cpu())
-                    # loss = self.loss_func(outputs, labels)
-                    # running_val_accuracy += accuracy
-                    # running_val_loss += loss.item()
-                    # val_batch_count += 1
 
             # Early stopping
             early_stopping(running_val_loss / val_batch_count)
