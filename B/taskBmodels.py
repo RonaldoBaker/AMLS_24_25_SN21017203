@@ -169,7 +169,7 @@ class CNNModelTrainer:
         print(classification_report(all_labels, all_predictions, zero_division=0))
 
 
-    def plot_training_curve(self):
+    def plot_training_curve(self, filepath: str):
         # Plot the training curve
         plt.figure()
         plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss")
@@ -179,4 +179,4 @@ class CNNModelTrainer:
         plt.legend()
         plt.grid()
         plt.title("CNN Training Curve")
-        plt.savefig("figures/CNN_Training_Curve.png")
+        plt.savefig(filepath)
