@@ -20,9 +20,9 @@ def taskA():
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
     SOLVER = "lbfgs"
-    RUN_LOGREG = False
-    RUN_KNN = False
-    RUN_SVM = False
+    RUN_LOGREG = True
+    RUN_KNN = True
+    RUN_SVM = True
     RUN_CNN = True
 
     # Load BreastMNIST data
@@ -169,7 +169,11 @@ def taskA():
         # Instantiate CNN model and move to device being used
         print("CNN\n")
         cnn = CNNModel()
-        cnn.to(DEVICE) 
+        cnn.to(DEVICE)
+
+        SAVE = True
+        if SAVE:
+            torch.save(cnn.state_dict(), "cnn_modelA.pth")
 
         # Define loss function and optimiser
         loss_func = nn.BCELoss()
@@ -177,6 +181,6 @@ def taskA():
 
         # Train model
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
-        cnn_trainer.train(patience=3)
+        cnn_trainer.train(patience=2)
         cnn_trainer.evaluate()
-        cnn_trainer.plot_training_curve()
+        cnn_trainer.plot_training_curve(filepath="figures/training_curve_taskA.png")
