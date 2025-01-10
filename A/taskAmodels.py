@@ -165,14 +165,15 @@ class CNNModelTrainer:
         print(classification_report(all_labels, all_predictions, zero_division=0))
 
 
-    def plot_training_curve(self):
+    def plot_training_curve(self, filepath: str):
         # Plot the training curve
-        plt.figure()
-        plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss")
-        plt.plot(range(1, len(self.val_losses)+1, 1), self.val_losses, label="Validation Loss")
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.legend()
-        plt.grid()
-        plt.title("CNN Training Curve")
-        plt.savefig("figures/CNN_Training_Curve.png")
+        plt.figure(figsize=(6,4))
+        plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss", linewidth=2)
+        plt.plot(range(1, len(self.val_losses)+1, 1), self.val_losses, label="Validation Loss", linewidth=2, linestyle='--')
+        plt.xlabel("Epoch", fontsize=12)
+        plt.ylabel("Loss", fontsize=12)
+        plt.legend(fontsize=10)
+        plt.grid(True, linestyle='--', alpha=0.8)
+        plt.title("Training and Validation Loss for Task A CNN", fontsize=12)
+        plt.tight_layout()
+        plt.savefig(filepath, dpi=300)
