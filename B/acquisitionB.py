@@ -33,7 +33,7 @@ def load_bloodmnist_data(datapath: str) -> Dict[str, ArrayLike]:
 
 def display_info(data: ArrayLike):
     # Get dataset info
-    dataset = BloodMNIST(split="train")
+    dataset = BloodMNIST(split="train", download=True)
     print(dataset.info, "\n")
 
     # Find shape of arrays
