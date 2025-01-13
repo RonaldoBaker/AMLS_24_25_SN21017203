@@ -18,8 +18,8 @@ def taskB():
     Executes task B, including data loading, processing and model training/evaluation
     """
     # Define constants
-    RUN_KNN = False
-    RUN_SVM = True
+    RUN_KNN = True
+    RUN_SVM = False
     RUN_CNN = False
 
     # Load BloodMNIST data
@@ -40,49 +40,11 @@ def taskB():
     X_train, X_test = data[0], data[1]
     y_train, y_test = labels[0], labels[1]
 
-    # Check for class imbalanced
-
-
-    # data2 = preprocess_for_traditional(data = [train_data, test_data])
-    # X_train2, X_test2 = data2[0], data2[1]
-    # y_train2, y_test2 = train_labels, test_labels
-
 
     if RUN_KNN:
-        print("KNN\n")
-
-        # Code to perform randomised search for hyperparameter tuning
-        # Commented out for the sake of time
-        
-        # # Create KNN model
-        # knn = KNeighborsClassifier()
-
-        # # Define hyperparameter grid
-        # parameter_grid = {
-        #     "n_neighbors": np.arange(1, 31),
-        #     "weights": ["uniform", "distance"],
-        #     "algorithm": ["ball_tree", "kd_tree", "brute"],
-        # }
-
-        # # Perform grid search
-        # grid_search = RandomizedSearchCV(estimator=knn, param_distributions=parameter_grid, n_jobs=-1, scoring="accuracy")
-        # grid_search.fit(X_train, y_train.ravel())
-
-        # # Get the best parameters and corresponding accuracy score
-        # print(f"Best parameters: {grid_search.best_params_}")
-        # print(f"Best accuracy score: {grid_search.best_score_}")
-
-        # # Evaluate KNN model
-        # print("Evaluation on test set")
-        # best_knn = grid_search.best_estimator_
-        # y_pred = best_knn.predict(X_test)
-        # score = accuracy_score(y_test, y_pred) * 100
-        # print(f"Accuracy Score: {score: .2f}%\n")
-        # print("Classification Report (KNN)")
-        # print(classification_report(y_test, y_pred))
-        
-        # Redefine KNN model with best parameters
-        knn = KNeighborsClassifier(n_neighbors=2, weights="distance", algorithm="brute")
+        print("\nKNN\n")
+        # Define KNN model with best parameters
+        knn = KNeighborsClassifier(n_neighbors=4, weights="distance", algorithm="kd_tree")
         knn.fit(X_train, y_train.ravel())
 
         # Evaluate KNN model
@@ -91,6 +53,7 @@ def taskB():
 
         # Convert test labels to one-hot encoded format
         y_test_one_hot = label_binarize(y_test, classes=[0, 1, 2, 3, 4, 5, 6, 7])
+
         score = roc_auc_score(y_test_one_hot, y_pred_proba, multi_class="ovr") * 100
         print(f"Accuracy Score: {score: .2f}%\n")
         print("Classification Report (KNN)")
@@ -99,55 +62,22 @@ def taskB():
 
     if RUN_SVM:
         print("\nSVM\n")
-
-        # Code to perform randomised search for hyperparameter tuning
-        # Commented out for the sake of time
-        """
-        # Create SVM model
-        svm = SVC(class_weight="balanced")
-
-        # Define hyperparameter grid
-        parameter_grid = {
-            "C": [0.1, 1, 10],
-            "kernel": ["rbf", "poly"],
-            "gamma": ["scale", "auto"],
-            "degree": [2, 3, 4],
-            "decision_function_shape": ["ovo", "ovr"],
-        }
-
-        # Perform grid search
-        grid_search = RandomizedSearchCV(estimator=svm, param_distributions=parameter_grid, n_jobs=-1, scoring="accuracy", random_state=7)
-        grid_search.fit(X_train, y_train.ravel())
-
-        # Get the best parameters and corresponding accuracy score
-        print(f"Best parameters: {grid_search.best_params_}")
-        print(f"Best accuracy score: {grid_search.best_score_}")
-        
-        # Evaluate SVM model
-        print("Evaluation on test set")
-        best_svm = grid_search.best_estimator_
-        y_pred = best_svm.predict(X_test)
-        score = roc_auc_score(y_test, y_pred) * 100
-        print(f"Accuracy Score: {score: .2f}%\n")
-        print("Classification Report (SVM)")
-        
-        print(classification_report(y_test, y_pred))
-        """
-
-        # Redefine SVM model with best parameters
-        svm = SVC(kernel="poly", degree=4, gamma="scale", decision_function_shape="ovr", class_weight="balanced", probability=True)
+        # Define SVM model with best parameters
+        svm = SVC(C=0.1, kernel="poly", degree=4, gamma="scale", decision_function_shape="ovr", class_weight="balanced", probability=True)
         svm.fit(X_train, y_train.ravel())
 
         # Evaluate SVM model
         print("Evaluation on test set")
         y_pred_proba = svm.predict_proba(X_test)
+
+        # Convert test labels to one-hot encoded format
         y_test_one_hot = label_binarize(y_test, classes=[0, 1, 2, 3, 4, 5, 6, 7])
+
         score = roc_auc_score(y_test_one_hot, y_pred_proba) * 100
         print(f"Accuracy Score: {score: .2f}%\n")
         print("Classification Report (SVM)")
         y_pred = y_pred_proba.argmax(axis=1)
         print(classification_report(y_test, y_pred))
-
 
     if RUN_CNN:
         print("CNN\n")
