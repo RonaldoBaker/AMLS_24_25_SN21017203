@@ -38,7 +38,7 @@ class CNNModel(nn.Module):
         self.fc2 = nn.Linear(512, 256)  # Fully connected layer
         self.fc3 = nn.Linear(256, 128)  # Fully connected layer
         self.fc4 = nn.Linear(128, 8)  # Output layer for 8 classes
-        self.dropout = nn.Dropout(0.5)  # Dropout rate
+        self.dropout = nn.Dropout(0.4)  # Dropout rate
         self.softmax = nn.Softmax(dim=1)  # Activation function for multi-class classification
     
     def forward(self, x: ArrayLike) -> ArrayLike:
@@ -121,7 +121,7 @@ class CNNModelTrainer:
                     self.optimiser.zero_grad()
                     outputs = self.cnn(images)
                     _, predicted = torch.max(outputs.data, 1)
-                    accuracy = accuracy_score(labels.cpu(), predicted.cpu().numpy())
+                    accuracy = accuracy_score(labels.cpu(), predicted.cpu())
                     loss = self.loss_func(outputs, labels.squeeze(1).long())
                     running_val_accuracy += accuracy
                     running_val_loss += loss.item()
@@ -153,7 +153,7 @@ class CNNModelTrainer:
             for image, labels in self.test_data:
                 outputs = self.cnn(image)
                 _, predicted = torch.max(outputs.data, 1)
-                accuracy = accuracy_score(labels.cpu(), predicted.cpu().numpy())
+                accuracy = accuracy_score(labels.cpu(), predicted.cpu())
                 
                 
                 # predicted_labels = (outputs > 0.5).int()
