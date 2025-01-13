@@ -14,8 +14,8 @@ def taskB():
     Executes task B, including data loading, processing and model training/evaluation
     """
     # Define constants
-    RUN_SVM = True
-    RUN_CNN = False
+    RUN_SVM = False
+    RUN_CNN = True
 
     # Load BloodMNIST data
     data = load_bloodmnist_data(datapath="Datasets/bloodmnist.npz")
@@ -88,9 +88,9 @@ def taskB():
     if RUN_CNN:
         print("CNN\n")
         # CNN model from Task A
-        BATCH_SIZE = 64
+        BATCH_SIZE = 128
         EPOCHS = 1000
-        LEARNING_RATE = 0.001
+        LEARNING_RATE = 0.0004
         RANDOM_SEED = 7
 
         # Set device
@@ -134,7 +134,6 @@ def taskB():
         val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
         # Instantiate CNN model and move to device being used
-        print("CNN\n")
         cnn = CNNModel()
         cnn.to(DEVICE) 
 
