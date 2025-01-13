@@ -2,12 +2,13 @@ import optuna
 import torch 
 import torch.nn as nn
 import torch.optim as optim
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from typing import List
 from numpy.typing import ArrayLike
 from sklearn.metrics import accuracy_score
 from acquisitionB import load_bloodmnist_data
+from taskBmodels import EarlyStopping
 
 # Set device
 if torch.cuda.is_available():
@@ -82,7 +83,7 @@ def objective(trial, datasets: List[ArrayLike]):
 
     # Create hyperparameter search space
     learning_rate = trial.suggest_float("learning_rate", 1e-4, 1e-1, log=True)
-    dropout_rate = trial.suggest_uniform("dropout_rate", 0.1, 0.5)
+    dropout_rate = trial.suggest_float("dropout_rate", 0.1, 0.5, step=0.1)
     batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256])
 
     # Get dataloaders
@@ -94,9 +95,12 @@ def objective(trial, datasets: List[ArrayLike]):
     loss_func = nn.CrossEntropyLoss()
     optimiser = optim.Adam(cnn.parameters(), lr=learning_rate)
 
+    # Early stopping setup
+    early_stopping = EarlyStopping(patience=3)
+
     # Training loop
     epochs = 1000
-    for epoch in range(tqdm(epochs)):
+    for epoch in tqdm(range(epochs)):
         running_train_loss = 0.0
         train_batch_count = 0
         running_val_loss = 0.0
@@ -121,7 +125,7 @@ def objective(trial, datasets: List[ArrayLike]):
                 optimiser.zero_grad()
                 outputs = cnn(images)
                 _, predicted = torch.max(outputs.data, 1)
-                accuracy = accuracy_score(labels.cpu(), predicted.cpu().numpy())
+                accuracy = accuracy_score(labels.cpu(), predicted.cpu())
                 loss = loss_func(outputs, labels.squeeze(1).long())
                 running_val_accuracy += accuracy
                 running_val_loss += loss.item()
@@ -141,6 +145,12 @@ def objective(trial, datasets: List[ArrayLike]):
         # Prune unpromising trials
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
+        
+        # Early stopping check
+        early_stopping(running_val_loss / val_batch_count)
+        if early_stopping.early_stop:
+            print(f"Early stopping at epoch: {epoch}")
+            break
 
     return val_accuracy
 
@@ -180,7 +190,7 @@ pruner = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=20, inte
 study = optuna.create_study(direction="maximize", pruner=pruner)
 
 # Run the optimisation
-study.optimize(lambda trial: objective(trial, [train_set, test_set, val_set]), n_trials=50)
+study.optimize(lambda trial: objective(trial, [train_set, test_set, val_set]), n_trials=60)
 
 # Print the best hyperparameters
 print("Best hyperparameters:", study.best_params)
