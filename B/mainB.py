@@ -18,8 +18,8 @@ def taskB():
     Executes task B, including data loading, processing and model training/evaluation
     """
     # Define constants
-    RUN_KNN = True
-    RUN_SVM = False
+    RUN_KNN = False
+    RUN_SVM = True
     RUN_CNN = False
 
     # Load BloodMNIST data
@@ -127,22 +127,25 @@ def taskB():
         print("Evaluation on test set")
         best_svm = grid_search.best_estimator_
         y_pred = best_svm.predict(X_test)
-        score = accuracy_score(y_test, y_pred) * 100
+        score = roc_auc_score(y_test, y_pred) * 100
         print(f"Accuracy Score: {score: .2f}%\n")
         print("Classification Report (SVM)")
+        
         print(classification_report(y_test, y_pred))
         """
 
         # Redefine SVM model with best parameters
-        svm = SVC(kernel="poly", degree=4, gamma="scale", decision_function_shape="ovr", class_weight="balanced")
+        svm = SVC(kernel="poly", degree=4, gamma="scale", decision_function_shape="ovr", class_weight="balanced", probability=True)
         svm.fit(X_train, y_train.ravel())
 
         # Evaluate SVM model
         print("Evaluation on test set")
-        y_pred = svm.predict(X_test)
-        score = accuracy_score(y_test, y_pred) * 100
+        y_pred_proba = svm.predict_proba(X_test)
+        y_test_one_hot = label_binarize(y_test, classes=[0, 1, 2, 3, 4, 5, 6, 7])
+        score = roc_auc_score(y_test_one_hot, y_pred_proba) * 100
         print(f"Accuracy Score: {score: .2f}%\n")
         print("Classification Report (SVM)")
+        y_pred = y_pred_proba.argmax(axis=1)
         print(classification_report(y_test, y_pred))
 
 
