@@ -5,7 +5,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
-from sklearn.model_selection import RandomizedSearchCV
 from sklearn.preprocessing import label_binarize
 from sklearn.neighbors import KNeighborsClassifier
 from B.acquisitionB import load_bloodmnist_data, display_info
@@ -18,9 +17,9 @@ def taskB():
     Executes task B, including data loading, processing and model training/evaluation
     """
     # Define constants
-    RUN_KNN = True
+    RUN_KNN = False
     RUN_SVM = False
-    RUN_CNN = False
+    RUN_CNN = True
 
     # Load BloodMNIST data
     data = load_bloodmnist_data(datapath="Datasets/bloodmnist.npz")
@@ -35,11 +34,11 @@ def taskB():
     test_labels = data["test_labels"]
     val_data = data["val_data"]
     val_labels = data["val_labels"]
+    print(train_labels.shape, test_data.shape, val_data.shape)
 
-    data, labels = preprocess_for_traditional(data = [train_data, test_data], labels=[train_labels, test_labels])
-    X_train, X_test = data[0], data[1]
-    y_train, y_test = labels[0], labels[1]
-
+    data, labels = preprocess_for_traditional(data = [train_data, test_data, val_data], labels=[train_labels, test_labels, val_labels])
+    X_train, X_test, X_val = data[0], data[1], data[2]
+    y_train, y_test, y_val = labels[0], labels[1], labels[2]
 
     if RUN_KNN:
         print("\nKNN\n")
@@ -107,15 +106,21 @@ def taskB():
         test_data = test_data.transpose(0, 3, 1, 2)
         val_data = val_data.transpose(0, 3, 1, 2)
 
+        # Add dimension to labels
+        y_train, y_test, y_val = y_train.reshape(-1, 1), y_test.reshape(-1, 1), y_val.reshape(-1, 1)
+
+        # Reshape images for CNN
+        X_train, X_test, X_val = X_train.reshape(-1, 3, 28, 28), X_test.reshape(-1, 3, 28, 28), X_val.reshape(-1, 3, 28, 28)
+
         # Create tensors and add dimension for greyscale image data, and make labels 2D
-        train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32)
-        train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
+        train_data_tensor = torch.tensor(X_train, device=DEVICE, dtype=torch.float32)
+        train_labels_tensor = torch.tensor(y_train, device=DEVICE, dtype=torch.float32)
 
-        test_data_tensor = torch.tensor(test_data, device=DEVICE, dtype=torch.float32)
-        test_labels_tensor = torch.tensor(test_labels, device=DEVICE, dtype=torch.float32)
+        test_data_tensor = torch.tensor(X_test, device=DEVICE, dtype=torch.float32)
+        test_labels_tensor = torch.tensor(y_test, device=DEVICE, dtype=torch.float32)
 
-        val_data_tensor = torch.tensor(val_data, device=DEVICE, dtype=torch.float32)  
-        val_labels_tensor = torch.tensor(val_labels, device=DEVICE, dtype=torch.float32)
+        val_data_tensor = torch.tensor(X_val, device=DEVICE, dtype=torch.float32)  
+        val_labels_tensor = torch.tensor(y_val, device=DEVICE, dtype=torch.float32)
         
         # Create DataLoaders 
         train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
