@@ -1,6 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.metrics import classification_report, accuracy_score
+import torch.nn.functional as F
+from sklearn.metrics import classification_report, accuracy_score, roc_auc_score
 from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 
@@ -64,6 +66,49 @@ class CNNModel(nn.Module):
         x = self.fc4(x)  # Apply softmax function for multi-class classification
         return x
     
+class CNNModel2(nn.Module):
+    def __init__(self):
+        """
+        Defines the CNN model architecture
+        """
+        super().__init__()
+        # self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2) # First Conv layer
+        # self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2) # Second Conv layer
+        # self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
+        # self.relu = nn.ReLU() # Activation function
+        # self.fc1 = nn.Linear(16 * 1 * 1, 8) # Fully connected layer
+        # self.fc2 = nn.Linear(8, 1) # Single output for binary classification
+        # self.sigmoid = nn.Sigmoid() # Activation function
+
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=2, stride=1) # First Conv layer
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=2, stride=1) # Second Conv layer
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
+        self.relu = nn.ReLU() # Activation function
+        self.fc1 = nn.Linear(32 * 6 * 6, 512) # Fully connected layer
+        self.fc2 = nn.Linear(512, 256) # Fully connected layer
+        self.fc3 = nn.Linear(256, 128) # Fully connected layer
+        self.fc4 = nn.Linear(128, 8) # Output layer for 8 classes
+        self.dropout = nn.Dropout(0.3) # Dropout rate
+        self.softmax = nn.Softmax(dim=1) # Activation function
+
+    def forward(self, x: ArrayLike) -> ArrayLike:
+        """
+        Defines how the input goes through the forward pass
+
+        Arg:
+        - x (ArrayLike): The data to pass through the neural network
+
+        Returns:
+        ArrayLike: The output of the CNN model
+        """
+        x = self.pool(self.relu(self.conv1(x)))
+        x = self.pool(self.relu(self.conv2(x)))
+        x = x.view(x.shape[0], -1) # Flatten for the fully connected layer
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x)) 
+        x = self.relu(self.fc3(x))
+        x = self.fc4(x) # Apply softmax function for multi-class classification
+        return x
 
 class CNNModelTrainer:
     def __init__(
@@ -117,15 +162,33 @@ class CNNModelTrainer:
             # Validation
             with torch.no_grad():
                 self.cnn.eval()
+                all_labels = []
+                all_probabilities = []
                 for images, labels in self.val_data:
                     self.optimiser.zero_grad()
                     outputs = self.cnn(images)
-                    _, predicted = torch.max(outputs.data, 1)
-                    accuracy = accuracy_score(labels.cpu(), predicted.cpu())
-                    loss = self.loss_func(outputs, labels.squeeze(1).long())
-                    running_val_accuracy += accuracy
+                    probabilities = F.softmax(outputs, dim=1)
+                    predicted = torch.argmax(probabilities, dim=1)
+
+                    # Ensure labels are 1D
+                    labels = labels.squeeze(1).long()
+                    all_labels.extend(labels.cpu().numpy())
+                    all_probabilities.extend(probabilities.cpu().numpy())
+                    
+                    # Compute loss
+                    loss = self.loss_func(outputs, labels)
+                    
                     running_val_loss += loss.item()
                     val_batch_count += 1
+
+                all_labels = np.array(all_labels)
+                all_probabilities = np.array(all_probabilities)
+                all_classes = list(range(8))
+
+                # Compute ROC AUC score
+                # accuracy = roc_auc_score(labels.cpu(), probabilities.cpu(), multi_class='ovr', labels=all_classes)
+                accuracy = roc_auc_score(all_labels, all_probabilities, multi_class='ovr', labels=all_classes)
+                running_val_accuracy += accuracy
 
             # Early stopping
             early_stopping(running_val_loss / val_batch_count)
@@ -149,22 +212,50 @@ class CNNModelTrainer:
 
         running_accuracy = 0.0
         batch_count = 0
+
+        self.cnn.eval()
         with torch.no_grad():
+            all_labels = []
+            all_probabilities = []
             for image, labels in self.test_data:
                 outputs = self.cnn(image)
-                _, predicted = torch.max(outputs.data, 1)
-                accuracy = accuracy_score(labels.cpu(), predicted.cpu())
-                
-                
-                # predicted_labels = (outputs > 0.5).int()
-                # accuracy = roc_auc_score(labels.cpu(), predicted_labels.cpu())
-                all_predictions.extend(predicted.cpu().numpy())
-                all_labels.extend(labels.cpu())
-                running_accuracy += accuracy
+                probabilities = F.softmax(outputs, dim=1)
+                predicted = torch.argmax(probabilities, dim=1)
+
+                # Ensure labels are 1D
+                labels = labels.squeeze(1).long()
+                all_labels.extend(labels.cpu().numpy())
+                all_probabilities.extend(probabilities.cpu().numpy())
                 batch_count += 1
 
+                # Compute accuracy score to compare
+                _, predicted = torch.max(outputs.data, 1)
+                accuracy = accuracy_score(labels.cpu(), predicted.cpu())
+                running_accuracy += accuracy
+
+
+
+            all_classes = list(range(8))
+
+            all_predictions = torch.argmax(torch.tensor(all_probabilities), dim=1).cpu().numpy()
+            all_labels = np.array(all_labels)
+            all_probabilities = np.array(all_probabilities)
+
+            val_accuracy = running_accuracy / batch_count
+            print(f"Accuracy on test data: {val_accuracy * 100: .2f}%\n")
+
+
+
+            # Compute ROC AUC score
+            # accuracy = roc_auc_score(labels.cpu(), probabilities.cpu(), multi_class='ovr', labels=all_classes)
+            accuracy = roc_auc_score(all_labels, all_probabilities, multi_class='ovr', labels=all_classes)   
+                #all_predictions.extend(predicted.cpu().numpy())
+                # all_labels.extend(labels.cpu())
+            running_accuracy += accuracy
+                
+
         avg_accuracy = running_accuracy / batch_count
-        print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
+        print(f"ROC Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
         print(classification_report(all_labels, all_predictions, zero_division=0))
 
@@ -179,4 +270,4 @@ class CNNModelTrainer:
         plt.legend()
         plt.grid()
         plt.title("CNN Training Curve")
-        plt.savefig(filepath)
+        # plt.savefig(filepath)
