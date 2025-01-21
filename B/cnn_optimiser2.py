@@ -1,12 +1,13 @@
 import optuna
 import torch 
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from typing import List
 from numpy.typing import ArrayLike
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_auc_score
 from acquisitionB import load_bloodmnist_data
 from taskBmodels import EarlyStopping
 from preprocessingB import preprocess_for_cnn
@@ -105,7 +106,7 @@ def objective(trial, datasets: List[ArrayLike]):
     early_stopping = EarlyStopping(patience=3)
 
     # Training loop
-    epochs = 1000
+    epochs = 500
     for epoch in tqdm(range(epochs)):
         running_train_loss = 0.0
         train_batch_count = 0
@@ -115,7 +116,7 @@ def objective(trial, datasets: List[ArrayLike]):
 
         # Train in batches
         cnn.train()
-        for _, (images, labels) in enumerate(train_loader):
+        for images, labels in train_loader:
             optimiser.zero_grad()
             outputs = cnn(images)
             loss = loss_func(outputs, labels.squeeze(1).long())
@@ -124,22 +125,30 @@ def objective(trial, datasets: List[ArrayLike]):
             running_train_loss += loss.item()
             train_batch_count += 1
 
-        # Validation
-        with torch.no_grad():
-            cnn.eval()
-            for images, labels in val_loader:
-                optimiser.zero_grad()
-                outputs = cnn(images)
-                _, predicted = torch.max(outputs.data, 1)
-                accuracy = accuracy_score(labels.cpu(), predicted.cpu())
-                loss = loss_func(outputs, labels.squeeze(1).long())
-                running_val_accuracy += accuracy
-                running_val_loss += loss.item()
-                val_batch_count += 1
+            # Validation
+            with torch.no_grad():
+                cnn.eval()
+                for images, labels in val_loader:
+                    optimiser.zero_grad()
+                    outputs = cnn(images)
+                    probabilities = F.softmax(outputs, dim=1)
+
+                    # Ensure labels are 1D
+                    labels = labels.squeeze(1).long()
+                    
+                    # Compute loss
+                    loss = loss_func(outputs, labels)
+                    # running_val_accuracy += accuracy
+                    running_val_loss += loss.item()
+                    val_batch_count += 1
+
+            # Compute ROC AUC score
+            accuracy = roc_auc_score(labels.cpu(), probabilities.cpu(), multi_class='ovr', labels=[0, 1, 2, 3, 4, 5, 6, 7])
 
         train_losses.append(running_train_loss / train_batch_count)
         val_losses.append(running_val_loss / val_batch_count)
-        val_accuracies.append(running_val_accuracy / val_batch_count)
+        # val_accuracies.append(running_val_accuracy / val_batch_count)
+        val_accuracies.append(accuracy)
 
         if epoch % 100 == 0:
             print(f"Epoch: {epoch} | Train Loss: {train_losses[-1]: .3f} | Val Loss: {val_losses[-1]: .3f} | Val Accuracy: {val_accuracies[-1]: .3f}")
