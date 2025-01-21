@@ -160,7 +160,7 @@ class CNNModelTrainer:
                 batch_count += 1
 
         avg_accuracy = running_accuracy / batch_count
-        print(f"Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
+        print(f"ROC-AUC Score on test data: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
         print(classification_report(all_labels, all_predictions, zero_division=0))
 
