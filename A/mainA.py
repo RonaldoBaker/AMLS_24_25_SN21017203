@@ -167,9 +167,6 @@ def taskA():
         cnn = CNNModel()
         cnn.to(DEVICE)
 
-        if SAVE_MODEL:
-            torch.save(cnn.state_dict(), "cnn_modelA.pth")
-
         # Define loss function and optimiser
         loss_func = nn.BCELoss()
         optimiser = optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
@@ -177,5 +174,9 @@ def taskA():
         # Train model
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
         cnn_trainer.train(patience=2)
+
+        if SAVE_MODEL:
+            torch.save(cnn_trainer.cnn_model.state_dict(), "cnn_modelA.pth")
+
         cnn_trainer.evaluate()
         cnn_trainer.plot_training_curve(filepath="figures/training_curve_taskA.png")
