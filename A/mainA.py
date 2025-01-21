@@ -1,6 +1,6 @@
 # Import dependencies
 from A.acquisitionA import load_breastmnist_data, display_info
-from A.preprocessingA import preprocess_for_traditional, preprocess_for_cnn
+from A.preprocessingA import preprocess_for_traditional
 from A.taskAmodels import CNNModel, CNNModelTrainer
 import matplotlib.pyplot as plt
 import torch
@@ -19,7 +19,6 @@ def taskA():
     """
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
-    SOLVER = "lbfgs"
     RUN_LOGREG = True
     RUN_KNN = True
     RUN_SVM = True
@@ -47,8 +46,9 @@ def taskA():
     # ------------------------------------------------------------------- #
     # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
+        solver = "lbfgs"
         print("LOGISTIC REGRESSION\n")
-        logreg = LogisticRegression(solver = SOLVER, class_weight="balanced") # Create model
+        logreg = LogisticRegression(solver = solver, class_weight="balanced") # Create model
         logreg.fit(X_train_balanced, y_train_balanced) # Fit model
         y_pred = logreg.predict(X_test) # Make predictions
 
@@ -125,17 +125,13 @@ def taskA():
     EPOCHS = 1000
     LEARNING_RATE = 0.001
     RANDOM_SEED = 7
+    SAVE_MODEL = True
 
     # Set random seed for reproducibility
     torch.manual_seed(RANDOM_SEED)
     torch.cuda.manual_seed(RANDOM_SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
-    # Preprocess data for CNN model
-    data, labels = preprocess_for_cnn(data = [train_data, test_data, val_data], labels = [train_labels, test_labels, val_labels])
-    X_train_balanced, X_test, X_val = data[0], data[1], data[2]
-    y_train_balanced, y_test, y_val = labels[0], labels[1], labels[2]
 
     if RUN_CNN:
         if torch.cuda.is_available():
@@ -171,8 +167,7 @@ def taskA():
         cnn = CNNModel()
         cnn.to(DEVICE)
 
-        SAVE = True
-        if SAVE:
+        if SAVE_MODEL:
             torch.save(cnn.state_dict(), "cnn_modelA.pth")
 
         # Define loss function and optimiser
