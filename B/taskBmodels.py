@@ -233,8 +233,6 @@ class CNNModelTrainer:
                 accuracy = accuracy_score(labels.cpu(), predicted.cpu())
                 running_accuracy += accuracy
 
-
-
             all_classes = list(range(8))
 
             all_predictions = torch.argmax(torch.tensor(all_probabilities), dim=1).cpu().numpy()
@@ -243,8 +241,6 @@ class CNNModelTrainer:
 
             val_accuracy = running_accuracy / batch_count
             print(f"Accuracy on test data: {val_accuracy * 100: .2f}%\n")
-
-
 
             # Compute ROC AUC score
             # accuracy = roc_auc_score(labels.cpu(), probabilities.cpu(), multi_class='ovr', labels=all_classes)
@@ -255,7 +251,7 @@ class CNNModelTrainer:
                 
 
         avg_accuracy = running_accuracy / batch_count
-        print(f"ROC Accuracy on test data: {avg_accuracy * 100: .2f}%\n")
+        print(f"ROC-AUC Score: {avg_accuracy * 100: .2f}%\n")
         print("Classification Report (CNN)")
         print(classification_report(all_labels, all_predictions, zero_division=0))
 
