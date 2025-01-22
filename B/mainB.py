@@ -112,10 +112,10 @@ def taskB(mode: str):
         if mode == "test":
             # Load saved model and evaluate
             cnn = CNNModel()
-            cnn.load_state_dict(torch.load(MODEL_PATH))
+            cnn.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
             cnn.to(DEVICE)
             cnn.eval()
-            cnn_trainer = CNNModelTrainer(None, test_loader, None, cnn, EPOCHS, None, None)
+            cnn_trainer = CNNModelTrainer(None, test_loader, None, cnn, None, None, None)
             cnn_trainer.evaluate()
 
         elif mode == "train":
