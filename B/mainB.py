@@ -7,7 +7,6 @@ from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.preprocessing import label_binarize
 from sklearn.neighbors import KNeighborsClassifier
 from B.acquisitionB import load_bloodmnist_data, display_info
-# from B.preprocessingB import preprocess_for_cnn
 from A.preprocessingA import preprocess_for_traditional
 from B.taskBmodels import CNNModel, CNNModelTrainer
 
@@ -80,7 +79,7 @@ def taskB(mode: str):
         print("CNN\n")
         # CNN model from Task A
         BATCH_SIZE = 128
-        EPOCHS = 1000
+        EPOCHS = 100
         LEARNING_RATE = 0.0004
         RANDOM_SEED = 7
         SAVE_MODEL = True
