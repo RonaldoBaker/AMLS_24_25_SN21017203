@@ -98,12 +98,14 @@ def taskA(mode: str):
         print(classification_report(y_test, y_pred))
 
         # Plot number of nearest neighbours vs AUC-ROC score
-        plt.figure()
-        plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b')
-        plt.grid()
-        plt.title("Accuracy vs K Value")
-        plt.xlabel("No. of nearest neighbours")
-        plt.ylabel("AUC-ROC Score")
+
+        plt.figure(figsize=(6,4))
+        plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b', linewidth = 2)
+        plt.title("ROC-AUC vs K Value")
+        plt.xlabel("K Value", fontsize=12)
+        plt.ylabel("ROC-AUC Score (%)", fontsize=12)
+        plt.grid(True, linestyle='--', alpha=0.8)
+        plt.tight_layout()
         plt.savefig("figures/KNN_Accuracy_vs_K.png")
  
     # ------------------------------------------------------------------- #
@@ -129,7 +131,7 @@ def taskA(mode: str):
         print("CNN\n")
         # Define hyperparameters
         BATCH_SIZE = 64
-        EPOCHS = 1000
+        EPOCHS = 100
         LEARNING_RATE = 0.001
         RANDOM_SEED = 7
         SAVE_MODEL = True
