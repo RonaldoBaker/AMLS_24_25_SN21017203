@@ -13,9 +13,13 @@ from sklearn.metrics import roc_auc_score, classification_report
 from sklearn.svm import SVC
 
 
-def taskA():
+def taskA(mode: str):
+
     """
-    Executes task A, including data loading and model training/evaluation
+    Executes task A, including data loading, preprocessing, and model training/evaluation.
+    
+    Arg(s):
+    mode (str): The mode in which to run the task. Options are 'test' or 'train'. If 'train', models are trained and evaluated. If 'test', saved models are loaded and evaluated.
     """
     # Define constants
     DATAPATH = "Datasets/breastmnist.npz"
@@ -46,9 +50,8 @@ def taskA():
     # ------------------------------------------------------------------- #
     # Logistic regression model - using the lbfgs solver
     if RUN_LOGREG:
-        solver = "lbfgs"
         print("LOGISTIC REGRESSION\n")
-        logreg = LogisticRegression(solver = solver, class_weight="balanced") # Create model
+        logreg = LogisticRegression(solver = "lbfgs", class_weight="balanced") # Create model
         logreg.fit(X_train_balanced, y_train_balanced) # Fit model
         y_pred = logreg.predict(X_test) # Make predictions
 
@@ -120,20 +123,24 @@ def taskA():
 
     # ------------------------------------------------------------------- #
     # CNN model
-    # Define hyperparameters
-    BATCH_SIZE = 64
-    EPOCHS = 1000
-    LEARNING_RATE = 0.001
-    RANDOM_SEED = 7
-    SAVE_MODEL = True
 
-    # Set random seed for reproducibility
-    torch.manual_seed(RANDOM_SEED)
-    torch.cuda.manual_seed(RANDOM_SEED)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
     if RUN_CNN:
+        print("CNN\n")
+        # Define hyperparameters
+        BATCH_SIZE = 64
+        EPOCHS = 1000
+        LEARNING_RATE = 0.001
+        RANDOM_SEED = 7
+        SAVE_MODEL = True
+        MODEL_PATH = "A/cnn_modelA.pth"
+
+        # Set random seed for reproducibility
+        torch.manual_seed(RANDOM_SEED)
+        torch.cuda.manual_seed(RANDOM_SEED)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
         if torch.cuda.is_available():
             # Define device if dedicated GPU is available
             DEVICE_NUM = 1
@@ -142,41 +149,51 @@ def taskA():
         else:
             DEVICE = torch.device("cpu")
 
-        # Create tensors and add dimension for greyscale image data, and make labels 2D
-        train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
-        train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
+        # Instantiate CNN model
+        cnn = CNNModel()
 
+        # Create the test loader first if the mode is 'test'
         test_data_tensor = torch.tensor(test_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
         test_labels_tensor = torch.tensor(test_labels, device=DEVICE, dtype=torch.float32)
-
-        val_data_tensor = torch.tensor(val_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)  
-        val_labels_tensor = torch.tensor(val_labels, device=DEVICE, dtype=torch.float32)
-
-        # Create DataLoaders 
-        train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
-        train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
-
         test_set = [(test_data_tensor[i], test_labels_tensor[i]) for i in range(len(test_data_tensor))]
         test_loader = DataLoader(test_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
-        val_set = [(val_data_tensor[i], val_labels_tensor[i]) for i in range(len(val_data_tensor))]
-        val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
+        if mode == "test":
+            # Load saved model and evaluate
+            cnn.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
+            cnn.to(DEVICE)
+            cnn.eval()
+            cnn_trainer = CNNModelTrainer(None, test_loader, None, cnn, None, None, None)
+            cnn_trainer.evaluate()
 
-        # Instantiate CNN model and move to device being used
-        print("CNN\n")
-        cnn = CNNModel()
-        cnn.to(DEVICE)
+        elif mode == "train":
+            # Create tensors and add dimension for greyscale image data, and make labels 2D
+            train_data_tensor = torch.tensor(train_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)
+            train_labels_tensor = torch.tensor(train_labels, device=DEVICE, dtype=torch.float32)
 
-        # Define loss function and optimiser
-        loss_func = nn.BCELoss()
-        optimiser = optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
+            val_data_tensor = torch.tensor(val_data, device=DEVICE, dtype=torch.float32).unsqueeze(1)  
+            val_labels_tensor = torch.tensor(val_labels, device=DEVICE, dtype=torch.float32)
 
-        # Train model
-        cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
-        cnn_trainer.train(patience=2)
+            # Create DataLoaders 
+            train_set = [(train_data_tensor[i], train_labels_tensor[i]) for i in range(len(train_data_tensor))]
+            train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
-        if SAVE_MODEL:
-            torch.save(cnn_trainer.cnn_model.state_dict(), "cnn_modelA.pth")
+            val_set = [(val_data_tensor[i], val_labels_tensor[i]) for i in range(len(val_data_tensor))]
+            val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=True)
 
-        cnn_trainer.evaluate()
-        cnn_trainer.plot_training_curve(filepath="figures/training_curve_taskA.png")
+            # Move CNN to device
+            cnn.to(DEVICE)
+
+            # Define loss function and optimiser
+            loss_func = nn.BCELoss()
+            optimiser = optim.Adam(cnn.parameters(), lr=LEARNING_RATE)
+
+            # Train model
+            cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
+            cnn_trainer.train(patience=2)
+
+            if SAVE_MODEL:
+                torch.save(cnn_trainer.cnn.state_dict(), MODEL_PATH)
+
+            cnn_trainer.evaluate()
+            cnn_trainer.plot_training_curve(filepath="figures/training_curve_taskA.png")
