@@ -3,6 +3,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from typing import Dict
 from medmnist import BreastMNIST
+from rich import print as rprint
 
 def load_breastmnist_data(datapath: str) -> Dict[str, ArrayLike]:
     """
@@ -36,7 +37,7 @@ def load_breastmnist_data(datapath: str) -> Dict[str, ArrayLike]:
 def display_info(data: ArrayLike):
     # Get dataset info
     dataset = BreastMNIST(split="train")
-    print(dataset.info, "\n")
+    rprint(dataset.info, "\n")
 
     # Find shape of arrays
     print(f"The shape of the training data is {data['train_data'].shape}")

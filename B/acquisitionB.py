@@ -2,6 +2,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from typing import Dict
 from medmnist import BloodMNIST
+from rich import print as rprint
 
 def load_bloodmnist_data(datapath: str) -> Dict[str, ArrayLike]:
     """
@@ -34,7 +35,7 @@ def load_bloodmnist_data(datapath: str) -> Dict[str, ArrayLike]:
 def display_info(data: ArrayLike):
     # Get dataset info
     dataset = BloodMNIST(split="train", download=True)
-    print(dataset.info, "\n")
+    rprint(dataset.info, "\n")
 
     # Find shape of arrays
     print(f"The shape of the training data is {data['train_data'].shape}")
