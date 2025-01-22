@@ -81,7 +81,7 @@ def taskA(mode: str):
     plt.ylabel("ROC-AUC Score (%)", fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.8)
     plt.tight_layout()
-    plt.savefig("figures/KNN_Accuracy_vs_K.png")
+    plt.savefig("A/KNN_Accuracy_vs_K.png")
  
     # ------------------------------------------------------------------- #
     # SVM model
