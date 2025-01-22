@@ -1,7 +1,6 @@
 # Import dependencies
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import List
 from imblearn.over_sampling import SMOTE
 
 def preprocess_for_traditional(data: tuple[ArrayLike, ArrayLike], labels: ArrayLike) -> ArrayLike:
@@ -32,42 +31,3 @@ def preprocess_for_traditional(data: tuple[ArrayLike, ArrayLike], labels: ArrayL
     data[0], labels[0] = smote.fit_resample(data[0], labels[0])
 
     return data, labels
-
-
-def balance_data(data: ArrayLike, labels: ArrayLike) -> ArrayLike:
-    """
-    Balances the dataset using the Synthetic Minority Over-sampling Technique (SMOTE).
-
-    Arg(s):
-    - data (ArrayLike): The data to be balanced
-    - labels (ArrayLike): The labels of the data to be balanced
-
-    Returns:
-    - tuple[ArrayLike, ArrayLike]: The balanced data and labels
-    """
-    smote = SMOTE(random_state=7)
-    data_resampled, labels_resampled = smote.fit_resample(data, labels)
-    return data_resampled, labels_resampled
-
-def scale(data: List[ArrayLike]) -> List[ArrayLike]:
-    """
-    Scales the data to the range [0, 1].
-
-    Arg(s):
-    - data (List[ArrayLike]): The data to be scaled
-
-    Returns:
-    - List[ArrayLike]: The scaled data
-    """
-    for i in range(len(data)):
-        data[i] = data[i] / 255.0
-    return data
-
-def flatten_labels(labels: List[ArrayLike]) -> List[ArrayLike]:
-    """
-    Flattens the labels to 1D arrays.
-    """
-    for i in range(len(labels)):
-        labels[i] = np.ravel(labels[i])
-    return labels
-    

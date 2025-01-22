@@ -65,50 +65,7 @@ class CNNModel(nn.Module):
         x = self.dropout(x)
         x = self.fc4(x)  # Apply softmax function for multi-class classification
         return x
-    
-class CNNModel2(nn.Module):
-    def __init__(self):
-        """
-        Defines the CNN model architecture
-        """
-        super().__init__()
-        # self.conv1 = nn.Conv2d(1, 3, kernel_size=2, stride=2) # First Conv layer
-        # self.conv2 = nn.Conv2d(3, 16, kernel_size=2, stride=2) # Second Conv layer
-        # self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
-        # self.relu = nn.ReLU() # Activation function
-        # self.fc1 = nn.Linear(16 * 1 * 1, 8) # Fully connected layer
-        # self.fc2 = nn.Linear(8, 1) # Single output for binary classification
-        # self.sigmoid = nn.Sigmoid() # Activation function
 
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=2, stride=1) # First Conv layer
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=2, stride=1) # Second Conv layer
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2) # Max Pooling
-        self.relu = nn.ReLU() # Activation function
-        self.fc1 = nn.Linear(32 * 6 * 6, 512) # Fully connected layer
-        self.fc2 = nn.Linear(512, 256) # Fully connected layer
-        self.fc3 = nn.Linear(256, 128) # Fully connected layer
-        self.fc4 = nn.Linear(128, 8) # Output layer for 8 classes
-        self.dropout = nn.Dropout(0.3) # Dropout rate
-        self.softmax = nn.Softmax(dim=1) # Activation function
-
-    def forward(self, x: ArrayLike) -> ArrayLike:
-        """
-        Defines how the input goes through the forward pass
-
-        Arg:
-        - x (ArrayLike): The data to pass through the neural network
-
-        Returns:
-        ArrayLike: The output of the CNN model
-        """
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = x.view(x.shape[0], -1) # Flatten for the fully connected layer
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x)) 
-        x = self.relu(self.fc3(x))
-        x = self.fc4(x) # Apply softmax function for multi-class classification
-        return x
 
 class CNNModelTrainer:
     def __init__(
