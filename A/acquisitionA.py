@@ -35,6 +35,13 @@ def load_breastmnist_data(datapath: str) -> Dict[str, ArrayLike]:
 
 
 def display_info(data: ArrayLike):
+    """
+    Display information about the BreastMNIST dataset and the provided data.
+
+    Arg:
+    data (ArrayLike): A dictionary containing the training, validation, and testing data and labels.
+                      Expected keys are 'train_data', 'val_data', 'test_data', 'train_labels', 'val_labels', and 'test_labels'.
+    """
     # Get dataset info
     dataset = BreastMNIST(split="train")
     rprint(dataset.info, "\n")

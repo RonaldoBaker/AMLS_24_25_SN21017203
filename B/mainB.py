@@ -28,6 +28,7 @@ def taskB(mode: str):
     val_data = data["val_data"]
     val_labels = data["val_labels"]
 
+    # Preprocess data for traditional models
     data, labels = preprocess_for_traditional(data = [train_data, test_data], labels=[train_labels, test_labels])
     X_train, X_test = data[0], data[1]
     y_train, y_test = labels[0], labels[1]
@@ -66,6 +67,7 @@ def taskB(mode: str):
     # Convert test labels to one-hot encoded format
     y_test_one_hot = label_binarize(y_test, classes=[0, 1, 2, 3, 4, 5, 6, 7])
 
+    # Calculate ROC AUC score
     score = roc_auc_score(y_test_one_hot, y_pred_proba) * 100
     print(f"Accuracy Score: {score: .2f}%\n")
     print("Classification Report (SVM)")
@@ -75,7 +77,7 @@ def taskB(mode: str):
     # ---------------------------------------------------- #
     # CNN model
     print("CNN\n")
-    # CNN model from Task A
+    # Define hyperparameters
     BATCH_SIZE = 128
     EPOCHS = 100
     LEARNING_RATE = 0.0004
@@ -147,8 +149,10 @@ def taskB(mode: str):
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
         cnn_trainer.train(patience=3)
 
+        # Save model
         if SAVE_MODEL:
             torch.save(cnn_trainer.cnn.state_dict(), MODEL_PATH)
 
+        # Evaluate model
         cnn_trainer.evaluate()
         cnn_trainer.plot_training_curve("B/training_curve_taskB.png")

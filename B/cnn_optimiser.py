@@ -76,7 +76,17 @@ def get_dataloaders(datasets: List[ArrayLike], batch_size: int) -> tuple[DataLoa
         dataloaders.append(loader)
     return dataloaders[0], dataloaders[1], dataloaders[2]
 
-def objective(trial, datasets: List[ArrayLike]):
+def objective(trial, datasets: List[ArrayLike]) -> float:
+    """
+    Objective function for hyperparameter optimization using Optuna. It utilizes Optuna to suggest hyperparameters
+    and prunes unpromising trials. Early stopping is also implemented.
+    Arg(s):
+        - trial (optuna.trial.Trial): A trial object for hyperparameter suggestions.
+        - datasets (List[ArrayLike]): A list of datasets to be used for training, validation, and testing.
+    Returns:
+        float: The validation accuracy of the model.
+    """
+
     train_losses = []
     val_losses = []
     val_accuracies = []

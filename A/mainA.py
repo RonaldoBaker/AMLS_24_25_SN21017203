@@ -49,8 +49,7 @@ def taskA(mode: str):
     best_k = 0
     max_score = 0
     for k in range(1, NEIGHBOURS+1):
-        knn_model = KNeighborsClassifier(n_neighbors=k, weights="uniform")
-        # knn_model = KNNModel(neighbours=k)
+        knn_model = KNeighborsClassifier(n_neighbors=k, weights="uniform") # Instantiate model
         knn_model.fit(X_train_balanced, y_train_balanced) # Fit model
         y_pred = knn_model.predict(X_test) # Make predictions
 
@@ -75,7 +74,6 @@ def taskA(mode: str):
     print(classification_report(y_test, y_pred))
 
     # Plot number of nearest neighbours vs AUC-ROC score
-
     plt.figure(figsize=(6,4))
     plt.plot(range(1, NEIGHBOURS+1), accuracies, marker = 'o', linestyle = '--', color = 'b', linewidth = 2)
     plt.title("ROC-AUC vs K Value")
@@ -167,8 +165,10 @@ def taskA(mode: str):
         cnn_trainer = CNNModelTrainer(train_loader, test_loader, val_loader, cnn, EPOCHS, loss_func, optimiser)
         cnn_trainer.train(patience=2)
 
+        # Save model
         if SAVE_MODEL:
             torch.save(cnn_trainer.cnn.state_dict(), MODEL_PATH)
 
+        # Evaluate model
         cnn_trainer.evaluate()
         cnn_trainer.plot_training_curve(filepath="A/training_curve_taskA.png")

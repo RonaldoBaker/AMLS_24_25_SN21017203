@@ -28,6 +28,7 @@ test_labels = data["test_labels"]
 val_data = data["val_data"]
 val_labels = data["val_labels"]
 
+# Preprocess data for traditional models
 data, labels = preprocess_for_traditional(data = [train_data, test_data], labels=[train_labels, test_labels])
 X_train, X_test = data[0], data[1]
 y_train, y_test = labels[0], labels[1]

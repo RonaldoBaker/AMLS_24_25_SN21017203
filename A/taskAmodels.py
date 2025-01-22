@@ -91,11 +91,18 @@ class CNNModelTrainer:
         self.val_accuracies = []
 
     def train(self, patience: int = 5):
-        # TODO: Comment and add docstring
-
+        """
+        Train the Convolutional Neural Network (CNN) model with early stopping.
+        The function trains the CNN model using the training data and evaluates it on the validation data. 
+        It uses early stopping to halt training if the validation loss does not improve for a specified number of epochs.
+        The training and validation losses, as well as validation accuracies, are recorded for each epoch.
+        Args:
+            - patience (int): Number of epochs with no improvement after which training will be stopped. Default is 5.
+        """
         # Create instance of EarlyStopping class
         early_stopping = EarlyStopping(patience=patience)
 
+        # Training loop
         for epoch in range(self.epochs):
             running_train_loss = 0.0
             train_batch_count = 0
@@ -133,6 +140,7 @@ class CNNModelTrainer:
                 print(f"Early stopping at epoch: {epoch}")
                 break
 
+            # Record loss and accuracy
             self.train_losses.append(running_train_loss / train_batch_count)
             self.val_losses.append(running_val_loss / val_batch_count)
             self.val_accuracies.append(running_val_accuracy / val_batch_count)
@@ -143,22 +151,32 @@ class CNNModelTrainer:
 
 
     def evaluate(self):
-        # TODO: Comment and add docstring
+        """
+        Evaluate the performance of the CNN model on the test dataset.
+        This method computes the ROC-AUC score and generates a classification report
+        for the model's predictions on the test dataset. 
+        """
+        # Empty lists to record all predictions and all labels
         all_predictions = []
         all_labels = []
 
+        # Record accuracy and how many batches there are
         running_accuracy = 0.0
         batch_count = 0
+
         with torch.no_grad():
             for image, labels in self.test_data:
                 outputs = self.cnn(image)
                 predicted_labels = (outputs > 0.5).int()
+
+                # Compute ROC-AUC score
                 accuracy = roc_auc_score(labels.cpu(), predicted_labels.cpu())
                 all_predictions.extend(predicted_labels.cpu())
                 all_labels.extend(labels.cpu())
                 running_accuracy += accuracy
                 batch_count += 1
 
+        # Average accuracy over the batches
         avg_accuracy = running_accuracy / batch_count
         print("Evaluation on test set")
         print(f"ROC-AUC Score: {avg_accuracy * 100: .2f}%\n")
@@ -167,6 +185,11 @@ class CNNModelTrainer:
 
 
     def plot_training_curve(self, filepath: str):
+        """
+        Plots the training and validation loss curves and saves the plot to the specified file path.
+        Arg:
+            - filepath (str): The file path where the plot image will be saved.
+        """
         # Plot the training curve
         plt.figure(figsize=(6,4))
         plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss", linewidth=2)

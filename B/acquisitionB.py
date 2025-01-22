@@ -33,6 +33,13 @@ def load_bloodmnist_data(datapath: str) -> Dict[str, ArrayLike]:
             "test_labels": test_labels}
 
 def display_info(data: ArrayLike):
+    """
+    Display information about the BloodMNIST dataset and the provided data.
+
+    Arg:
+    data (ArrayLike): A dictionary containing the training, validation, and testing data and labels.
+                      Expected keys are 'train_data', 'val_data', 'test_data', 'train_labels', 'val_labels', and 'test_labels'.
+    """
     # Get dataset info
     dataset = BloodMNIST(split="train", download=True)
     rprint(dataset.info, "\n")

@@ -31,7 +31,7 @@ class CNNModel(nn.Module):
         Defines the CNN model architecture
         """
         super(CNNModel, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=2, stride=1)
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=2, stride=1)  # First Conv layer
         self.conv2 = nn.Conv2d(16, 32, kernel_size=2, stride=1)  # Second Conv layer
         self.conv3 = nn.Conv2d(32, 64, kernel_size=2, stride=1)  # Third Conv layer
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)  # Max Pooling
@@ -41,7 +41,6 @@ class CNNModel(nn.Module):
         self.fc3 = nn.Linear(256, 128)  # Fully connected layer
         self.fc4 = nn.Linear(128, 8)  # Output layer for 8 classes
         self.dropout = nn.Dropout(0.4)  # Dropout rate
-        self.softmax = nn.Softmax(dim=1)  # Activation function for multi-class classification
     
     def forward(self, x: ArrayLike) -> ArrayLike:
         """
@@ -93,13 +92,21 @@ class CNNModelTrainer:
         self.all_labels = []
 
     def train(self, patience: int = 5):
-        # TODO: Comment and add docstring
-
+        """
+        Train the Convolutional Neural Network (CNN) model with early stopping.
+        The function trains the CNN model using the training data and evaluates it on the validation data. 
+        It uses early stopping to halt training if the validation loss does not improve for a specified number of epochs.
+        The training and validation losses, as well as validation accuracies, are recorded for each epoch.
+        Args:
+            - patience (int): Number of epochs with no improvement after which training will be stopped. Default is 5.
+        """
         # Create instance of EarlyStopping class
         early_stopping = EarlyStopping(patience=patience)
 
+        # Define classes for roc_auc_score multi_class parameter
         all_classes = list(range(8))
 
+        # Training loop
         for epoch in range(self.epochs):
             running_train_loss = 0.0
             train_batch_count = 0
@@ -160,7 +167,11 @@ class CNNModelTrainer:
 
 
     def evaluate(self):
-        # TODO: Comment and add docstring
+        """
+        Evaluate the performance of the CNN model on the test dataset.
+        This method computes the ROC-AUC score and generates a classification report
+        for the model's predictions on the test dataset. 
+        """
         all_predictions = []
         all_labels = []
 
@@ -192,6 +203,11 @@ class CNNModelTrainer:
 
 
     def plot_training_curve(self, filepath: str):
+        """
+        Plots the training and validation loss curves and saves the plot to the specified file path.
+        Arg:
+            - filepath (str): The file path where the plot image will be saved.
+        """
         # Plot the training curve
         plt.figure(figsize=(6,4))
         plt.plot(range(1, len(self.train_losses)+1, 1), self.train_losses, label="Training Loss", linewidth=2)
@@ -202,4 +218,4 @@ class CNNModelTrainer:
         plt.grid(True, linestyle='--', alpha=0.8)
         plt.title("Training and Validation Loss for Task B CNN", fontsize=12)
         plt.tight_layout()
-        plt.savefig(filepath)
+        plt.savefig(filepath, dpi=300)
