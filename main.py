@@ -52,8 +52,10 @@ def main():
 
     # Execute specific tasks
     if run_taskA:
+        print(f"RUNNING TASK A IN {taskA_mode.upper()}\n")
         taskA(mode=taskA_mode)
     if run_taskB:
+        print(f"RUNNING TASK B IN {taskA_mode.upper()}\n")
         taskB(mode=taskB_mode)
 
 if __name__ == "__main__":
