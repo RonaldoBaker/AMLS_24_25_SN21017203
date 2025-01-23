@@ -22,7 +22,7 @@ This GitHub repository contains all the files used to complete the AMLS Assigmen
   - [mainB.py](B/mainB.py) - `Main program that trains and tests all models for Task B`
   - [taskBmodels.py](B/taskBmodels.py) - `Contains the CNN model and other helper classes for model training`
   - [tuning.py](B/tuning.py) - `Optimises all models used in Task B (this can be run from the CL)`
-- [Datasets](Datasets/) - `Datasets will need to be manually saved in this folder before running programs`
+- [Datasets/](Datasets/) - `Datasets will need to be manually saved in this folder before running programs`
   - breastmnist.npz
   - bloodmnist.npz
 - [env](env/)
@@ -38,7 +38,7 @@ Setup for this project can be carried out in different ways. In this project, a 
 
 1. Clone project to local machine
 ```
->>> git clone
+>>> git clone https://github.com/RonaldoBaker/AMLS_24_25_SN21017203.git
 ```
 
 2. Create conda environment from `environment.yml` file:
@@ -51,7 +51,11 @@ Setup for this project can be carried out in different ways. In this project, a 
 ```
 
 ## Dataset
+The dataset used in this project was taken from the [MedMNIST dataset collection](https://zenodo.org/records/10519652)
 
+For Task A, `breastmnist.npz` is used, which contains 28x28 pixel images. For Task B, `bloodmnist.npz` is used, which contains 28x28 pixel images. 
+
+These two files **MUST** be loaded into the [Datasets](Datasets/) folder before running [main.py](main.py).
 
 ## Usage
 The project can be run in various ways. You can choose to run individual tasks or both tasks at once. Each task can be run in either `train` or `test` mode. `Train` mode means the CNN specifically will train **and** test. `Test` mode means the saved model in the respective file will be loaded and only evaluated on the test set.
@@ -72,3 +76,8 @@ To run both projects in either `train` or `test` mode:
 ```
 The program will only expect up to two arguments. The argument must start with `a=` or `b=`, and the mode is specified after the `=` operator. If any inputs are not in the required format, the default mode will be run.
 
+Additionally, [tuning.py](B/tuning.py) can be run in the CL:
+```
+>>> python B/tuning.py
+```
+This file is used to tune the model hyperparameters in Task B. 
