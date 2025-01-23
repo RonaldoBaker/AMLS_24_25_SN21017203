@@ -31,7 +31,7 @@ This GitHub repository contains all the files used to complete the AMLS Assigmen
 - [main.py](main.py) `The main script to run both Task A and Task B`
 
 ## Requirements
-The requirements for this project are as listed in [requirements.txt](requirements.txt).
+The requirements for this project are as listed in [requirements.txt](env/requirements.txt).
 
 ## Setup and Installation
 Setup for this project can be carried out in different ways. In this project, a `.yml` file was used to create a conda environment and install the required modules from `requirements.txt`.
