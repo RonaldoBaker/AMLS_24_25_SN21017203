@@ -43,7 +43,7 @@ Setup for this project can be carried out in different ways. In this project, a 
 
 2. Create conda environment from `environment.yml` file:
 ```
- >>> conda create env -f environment.yml
+ >>> conda env create -f env/environment.yml
 ```
 3. **OR** if directly installing requirements from `.txt` file:
 ```
