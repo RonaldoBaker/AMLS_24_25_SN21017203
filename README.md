@@ -10,7 +10,7 @@ This GitHub repository contains all the files used to complete the AMLS Assigmen
 
 ## Repository Structure
 - [A/](A/)
-  - [acquisitionA.py](acquisitionA.py) - `Acquires the data from the MedMNIST API with useful metadata`
+  - [acquisitionA.py](A/acquisitionA.py) - `Acquires the data from the MedMNIST API with useful metadata`
   - cnn_modelA.pth - `The saved CNN model for Task A. Is used when Task A is run in 'test' mode`
   - mainA.py - `Main program that trains and tests all models for Task A`
   - preprocessingA.py - `Preprocesses the acquired data to be used in 'mainA.py'`
