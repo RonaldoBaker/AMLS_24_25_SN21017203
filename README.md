@@ -1,6 +1,6 @@
 # AMLS Assignment Academic Year 2024/25
 
-This GitHub repository contains all the files used to complete the AMLS Assigment for the academic year 2024/25. This assignment demonstrates the application of machine learnign algorithms to the problem of classifying medical images. It includes implementations using deep learning and traditional machine learning algorithms. The datasets used are part of the [MedMNIST collection](https://github.com/MedMNIST/MedMNIST), which must be downloaded and saved in the `Datasets` folder before attempting to replicate this work.
+This GitHub repository contains all the files used to complete the AMLS Assigment for the academic year 2024/25. This assignment demonstrates the application of machine learnign algorithms to the problem of classifying medical images. It includes implementations using deep learning and traditional machine learning algorithms. The datasets used are part of the [MedMNIST collection](https://github.com/MedMNIST/MedMNIST), which must be downloaded and saved in the `Datasets` folder before attempting to replicate this work. A `.gitkeep` file is in the `Datasets` folder to act as a placeholder.
 
 # Table of Contents
 1. [Repository Structure](#repository-structure)
